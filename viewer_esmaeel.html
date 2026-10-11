@@ -1,0 +1,203 @@
+<DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تفاصيل التحاويل الخاصه بـ خ اسماعيل - عرض</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --muted: #64748B; --border: #E2E8F0;
+    --gold: #B45309; --green: #15803D; --red: #B91C1C; --accent: #1E3A8A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Tajawal', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text);
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(24px + env(safe-area-inset-bottom, 0px));
+    font-size: 16px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 12px; color: var(--accent); }
+  h2 { font-size: 16px; margin: 0 0 10px; color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+  @media (min-width: 720px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .kpi .label { font-size: 13px; color: var(--muted); }
+  .kpi .val { font-size: 20px; font-weight: 700; margin-top: 4px; word-break: break-all; }
+  .gold { color: var(--gold); } .green { color: var(--green); } .red { color: var(--red); }
+  input, select {
+    width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid var(--border);
+    border-radius: 8px; background: #fff; color: var(--text);
+  }
+  .filter { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .filter input { flex: 1; min-width: 160px; }
+  .entry { border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: grid; gap: 6px; }
+  .entry .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #EFF6FF; color: var(--accent); }
+  .tag.transfer { background: #FFF7ED; color: var(--gold); }
+  .tag.bank { background: #F0FDF4; color: var(--green); }
+  .meta { font-size: 14px; color: var(--muted); }
+  .ded { font-size: 12px; color: var(--red); }
+  .empty { text-align: center; color: var(--muted); padding: 20px 0; }
+  .live { font-size: 12px; color: var(--green); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>تفاصيل التحاويل الخاصه بـ خ اسماعيل</h1>
+  <div class="live" id="live">جاري التحميل...</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">إجمالي الريال</div><div class="val gold" id="kTotalSar">0</div></div>
+    <div class="kpi"><div class="label">إجمالي السوداني (صرف)</div><div class="val green" id="kTotalSdg">0</div></div>
+    <div class="kpi"><div class="label">تحويلات بنكك</div><div class="val green" id="kBank">0</div></div>
+    <div class="kpi"><div class="label">تحويلات الريال</div><div class="val gold" id="kSarTr">0</div></div>
+    <div class="kpi"><div class="label">الريال المتبقي</div><div class="val gold" id="kRemSar">0</div></div>
+    <div class="kpi"><div class="label">عمولات البنك</div><div class="val red" id="kComm">0</div></div>
+    <div class="kpi"><div class="label">الجنيه المتبقي</div><div class="val green" id="kRemSdg">0</div></div>
+  </div>
+
+  <div class="card">
+    <h2>الحركات</h2>
+    <div class="filter">
+      <input type="text" id="search" placeholder="بحث بالتفاصيل أو المبلغ">
+      <select id="filterType" style="max-width:200px">
+        <option value="all">الكل</option>
+        <option value="exchange">صرف</option>
+        <option value="sarTransfer">تحويل ريال</option>
+        <option value="bank">تحويل بنكك</option>
+      </select>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+// ===== Firebase config (project: esmaeel-tafasi) =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDo2GSZeKlXesoNCCpcDkpv_Ct_igPuN5M",
+  authDomain: "esmaeel-tafasi.firebaseapp.com",
+  databaseURL: "https://esmaeel-tafasi-default-rtdb.firebaseio.com",
+  projectId: "esmaeel-tafasi",
+  storageBucket: "esmaeel-tafasi.firebasestorage.app",
+  messagingSenderId: "600912220481",
+  appId: "1:600912220481:web:3626a362de34b006ced1c0"
+};
+// =====================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+(function () {
+  let entries = [];
+  let settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06' };
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const typeLabel = (t) => t === 'exchange' ? 'صرف' : t === 'sarTransfer' ? 'تحويل ريال' : 'تحويل بنكك';
+
+  function effectiveRate(e) {
+    if (e.rate !== '' && e.rate != null) return Number(e.rate);
+    if (settings.defaultRate !== '' && settings.defaultRate != null) return Number(settings.defaultRate);
+    return null;
+  }
+  function sdgOf(e) {
+    const r = effectiveRate(e);
+    return (e.type !== 'exchange' || r == null) ? null : Number(e.amount) * r;
+  }
+
+  function computeTotals() {
+    const ex = entries.filter(e => e.type === 'exchange');
+    const sarTr = entries.filter(e => e.type === 'sarTransfer');
+    const bank = entries.filter(e => e.type === 'bank');
+    const totalSar = ex.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const totalSdg = ex.reduce((s, e) => s + (sdgOf(e) || 0), 0);
+    const bankTotal = bank.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const sarTrTotal = sarTr.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const sarTrDed = sarTr.filter(e => e.deducted).reduce((s, e) => s + Number(e.amount || 0), 0);
+    const cnt = ex.filter(e => (e.date || '') >= (settings.commFrom || '0000-00-00')).length;
+    const comm = Number(settings.commFixed || 0) + cnt * Number(settings.commPer || 0);
+    return {
+      totalSar, totalSdg, bankTotal, sarTrTotal, comm,
+      remSar: totalSar - sarTrDed,
+      remSdg: bankTotal - totalSdg - comm
+    };
+  }
+
+  function renderKpis() {
+    const t = computeTotals();
+    $('kTotalSar').textContent = fmt(t.totalSar);
+    $('kTotalSdg').textContent = fmt(t.totalSdg);
+    $('kBank').textContent = fmt(t.bankTotal);
+    $('kSarTr').textContent = fmt(t.sarTrTotal);
+    $('kRemSar').textContent = fmt(t.remSar);
+    $('kComm').textContent = fmt(t.comm);
+    $('kRemSdg').textContent = fmt(t.remSdg);
+  }
+
+  function renderList() {
+    const q = $('search').value.trim().toLowerCase();
+    const ft = $('filterType').value;
+    const list = $('list');
+    list.textContent = '';
+    const items = entries
+      .filter(e => ft === 'all' || e.type === ft)
+      .filter(e => !q || (e.details || '').toLowerCase().includes(q) || String(e.amount).includes(q))
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+
+    if (!items.length) {
+      const em = document.createElement('div'); em.className = 'empty'; em.textContent = 'لا توجد حركات';
+      list.appendChild(em); return;
+    }
+    for (const e of items) {
+      const div = document.createElement('div'); div.className = 'entry';
+      const top = document.createElement('div'); top.className = 'top';
+      const tag = document.createElement('span');
+      tag.className = 'tag' + (e.type === 'sarTransfer' ? ' transfer' : e.type === 'bank' ? ' bank' : '');
+      tag.textContent = typeLabel(e.type);
+      const date = document.createElement('span'); date.className = 'meta'; date.textContent = e.date || '';
+      top.append(tag, date); div.appendChild(top);
+
+      const amounts = document.createElement('div');
+      if (e.type === 'exchange') {
+        const r = effectiveRate(e), s = sdgOf(e);
+        amounts.textContent = fmt(e.amount) + ' ريال × ' + (r == null ? '—' : fmt(r)) + ' = ' + (s == null ? '—' : fmt(s)) + ' سوداني';
+      } else if (e.type === 'sarTransfer') amounts.textContent = fmt(e.amount) + ' ريال';
+      else amounts.textContent = fmt(e.amount) + ' سوداني';
+      div.appendChild(amounts);
+
+      if (e.details) { const d = document.createElement('div'); d.className = 'meta'; d.textContent = e.details; div.appendChild(d); }
+      if (e.deducted) { const d = document.createElement('div'); d.className = 'ded'; d.textContent = 'مخصوم'; div.appendChild(d); }
+      list.appendChild(div);
+    }
+  }
+
+  function start() {
+    db.ref('ledger').on('value', snap => {
+      const v = snap.val() || {};
+      entries = Object.entries(v).map(([id, x]) => ({ id, ...x }));
+      renderKpis(); renderList();
+      $('live').textContent = 'محدّث لحظياً';
+    }, err => {
+      $('live').style.color = 'var(--red)';
+      $('live').textContent = 'تعذر التحميل: ' + err.message;
+    });
+    db.ref('settings').on('value', snap => {
+      settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06', ...(snap.val() || {}) };
+      renderKpis();
+    });
+    $('search').addEventListener('input', renderList);
+    $('filterType').addEventListener('change', renderList);
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>

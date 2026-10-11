@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تفاصيل التحاويل الخاصه بـ خ اسماعيل - إدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --muted: #64748B; --border: #E2E8F0;
+    --gold: #B45309; --green: #15803D; --red: #B91C1C; --accent: #1E3A8A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Tajawal', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text);
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(24px + env(safe-area-inset-bottom, 0px));
+    font-size: 16px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 12px; color: var(--accent); }
+  h2 { font-size: 16px; margin: 0 0 10px; color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+  @media (min-width: 720px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .kpi .label { font-size: 13px; color: var(--muted); }
+  .kpi .val { font-size: 20px; font-weight: 700; margin-top: 4px; word-break: break-all; }
+  .gold { color: var(--gold); } .green { color: var(--green); } .red { color: var(--red); }
+  .form-grid { display: grid; gap: 10px; }
+  @media (min-width: 720px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
+  .settings-row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input, select {
+    width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid var(--border);
+    border-radius: 8px; background: #fff; color: var(--text);
+  }
+  .check { display: flex; align-items: center; gap: 8px; padding-top: 22px; }
+  .check input { width: 20px; height: 20px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  button { font: inherit; font-size: 16px; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: #fff; }
+  button.secondary { background: #E2E8F0; color: var(--text); }
+  button.danger { background: #FEE2E2; color: var(--red); padding: 6px 10px; font-size: 14px; }
+  button.edit { background: #EFF6FF; color: var(--accent); padding: 6px 10px; font-size: 14px; }
+  .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .entry { border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: grid; gap: 6px; }
+  .entry .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #EFF6FF; color: var(--accent); }
+  .tag.transfer { background: #FFF7ED; color: var(--gold); }
+  .tag.bank { background: #F0FDF4; color: var(--green); }
+  .meta { font-size: 14px; color: var(--muted); }
+  .ded { font-size: 12px; color: var(--red); }
+  .filter { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .filter input { flex: 1; min-width: 160px; }
+  .empty { text-align: center; color: var(--muted); padding: 20px 0; }
+  .status { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>تفاصيل التحاويل الخاصه بـ خ اسماعيل - إدارة</h1>
+
+  <!-- Login -->
+  <div class="card" id="loginCard">
+    <h2>تسجيل الدخول</h2>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div><label for="email">البريد الإلكتروني</label><input type="email" id="email" autocomplete="username"></div>
+      <div><label for="password">كلمة السر</label><input type="password" id="password" autocomplete="current-password"></div>
+    </div>
+    <div class="actions"><button id="loginBtn">دخول</button></div>
+    <div class="status" id="loginStatus"></div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="hidden">
+    <div class="actions" style="margin:0 0 12px">
+      <button class="secondary" id="logoutBtn">خروج</button>
+      <button class="hidden" id="importBtn">استيراد بيانات الإكسل (مرة واحدة)</button>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="label">إجمالي الريال</div><div class="val gold" id="kTotalSar">0</div></div>
+      <div class="kpi"><div class="label">إجمالي السوداني (صرف)</div><div class="val green" id="kTotalSdg">0</div></div>
+      <div class="kpi"><div class="label">تحويلات بنكك</div><div class="val green" id="kBank">0</div></div>
+      <div class="kpi"><div class="label">تحويلات الريال</div><div class="val gold" id="kSarTr">0</div></div>
+      <div class="kpi"><div class="label">الريال المتبقي</div><div class="val gold" id="kRemSar">0</div></div>
+      <div class="kpi"><div class="label">عمولات البنك</div><div class="val red" id="kComm">0</div></div>
+      <div class="kpi"><div class="label">الجنيه المتبقي</div><div class="val green" id="kRemSdg">0</div></div>
+    </div>
+
+    <div class="card">
+      <h2>الإعدادات</h2>
+      <div class="settings-row">
+        <div>
+          <label for="defaultRate">سعر اليوم (الافتراضي)</label>
+          <input type="number" id="defaultRate" inputmode="decimal" placeholder="اكتب السعر">
+          <div class="hint">أي صرف ما لوش سعر خاص بياخد السعر ده.</div>
+        </div>
+        <div>
+          <label for="commFixed">العمولة الثابتة</label>
+          <input type="number" id="commFixed" inputmode="decimal">
+        </div>
+      </div>
+      <div class="settings-row" style="margin-top:10px">
+        <div>
+          <label for="commPer">عمولة لكل صرف</label>
+          <input type="number" id="commPer" inputmode="decimal">
+        </div>
+        <div>
+          <label for="commFrom">تبدأ العمولة من تاريخ</label>
+          <input type="date" id="commFrom">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 id="formTitle">إضافة حركة</h2>
+      <div class="form-grid">
+        <div>
+          <label for="type">النوع</label>
+          <select id="type">
+            <option value="exchange">صرف (ريال ← سوداني)</option>
+            <option value="sarTransfer">تحويل ريال</option>
+            <option value="bank">تحويل بنكك (سوداني)</option>
+          </select>
+        </div>
+        <div><label for="date">التاريخ</label><input type="date" id="date"></div>
+        <div><label for="amount" id="amountLabel">المبلغ بالريال</label><input type="number" id="amount" inputmode="decimal"></div>
+        <div id="rateWrap">
+          <label for="rate">سعر التحويل (اختياري)</label>
+          <input type="number" id="rate" inputmode="decimal" placeholder="يأخذ سعر اليوم">
+        </div>
+        <div>
+          <label for="details">التفاصيل</label>
+          <input type="text" id="details" list="names" placeholder="مثال: مع نزار خالد">
+          <datalist id="names"></datalist>
+        </div>
+        <div class="check" id="dedWrap">
+          <input type="checkbox" id="deducted">
+          <label for="deducted" style="margin:0;color:var(--text)">مخصوم</label>
+        </div>
+      </div>
+      <div class="hint" id="preview"></div>
+      <div class="actions">
+        <button id="saveBtn">إضافة</button>
+        <button class="secondary hidden" id="cancelBtn">إلغاء التعديل</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>الحركات</h2>
+      <div class="filter">
+        <input type="text" id="search" placeholder="بحث بالتفاصيل أو المبلغ">
+        <select id="filterType" style="max-width:200px">
+          <option value="all">الكل</option>
+          <option value="exchange">صرف</option>
+          <option value="sarTransfer">تحويل ريال</option>
+          <option value="bank">تحويل بنكك</option>
+        </select>
+      </div>
+      <div id="list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 1) Paste your Firebase config here (from Firebase console > Project settings > Your apps) =====
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  databaseURL: "PASTE_HERE",
+  projectId: "PASTE_HERE",
+  storageBucket: "PASTE_HERE",
+  messagingSenderId: "PASTE_HERE",
+  appId: "PASTE_HERE"
+};
+// =====================================================================================================
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 1700, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 550, "rate": 1700, "details": "مع نزار خالد", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 300, "rate": 1700, "details": "البيت", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 116, "rate": 1720, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 80, "rate": 1700, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 150, "rate": 1720, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 2000, "rate": 1725, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 405, "rate": 1725, "details": "مع عبدالله", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 700, "rate": 1730, "details": "حساب البلاد", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 1330, "rate": 1730, "details": "مع محمد (لمبي)", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 500, "rate": 1725, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 1500, "rate": 1720, "details": "مع نزار خالد", "deducted": false}, {"type": "exchange", "date": "2026-09-01", "amount": 1000, "rate": 1725, "details": "د / محمد", "deducted": false}, {"type": "exchange", "date": "2026-09-02", "amount": 1000, "rate": 1725, "details": "خالد عبدالرحمن", "deducted": false}, {"type": "exchange", "date": "2026-09-02", "amount": 100, "rate": 1725, "details": "هني / عربي", "deducted": false}, {"type": "exchange", "date": "2026-09-03", "amount": 500, "rate": 1770, "details": "هني / عربي", "deducted": false}, {"type": "exchange", "date": "2026-09-03", "amount": 300, "rate": 1770, "details": "حساب راجحي", "deducted": false}, {"type": "exchange", "date": "2026-09-03", "amount": 100, "rate": 1770, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-03", "amount": 350, "rate": 1770, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-05", "amount": 500, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-05", "amount": 54, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-06", "amount": 1000, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-06", "amount": 650, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-06", "amount": 500, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-07", "amount": 650, "rate": 1818, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-09", "amount": 1000, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-11", "amount": 200, "rate": 1800, "details": "نزار", "deducted": false}, {"type": "exchange", "date": "2026-09-12", "amount": 200, "rate": 1800, "details": "نزار", "deducted": false}, {"type": "exchange", "date": "2026-09-13", "amount": 500, "rate": 1800, "details": "حساب البلاد ٧٣٣", "deducted": false}, {"type": "exchange", "date": "2026-09-16", "amount": 3333, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-09-11", "amount": 333, "rate": 1800, "details": "", "deducted": false}, {"type": "exchange", "date": "2026-10-08", "amount": 200, "rate": 2180, "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 10000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 5000000, "rate": "", "details": "مع نزار خالد", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 974625, "rate": "", "details": "البيت", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 783000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 531000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 2000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 177000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 615500, "rate": "", "details": "مع عبدالله", "deducted": false}, {"type": "bank", "date": "2026-09-01", "amount": 1000000, "rate": "", "details": "حساب البلاد", "deducted": false}, {"type": "bank", "date": "2026-09-05", "amount": 3000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-05", "amount": 3000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-05", "amount": 3000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-14", "amount": 3000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-15", "amount": 3000000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-11", "amount": 73000, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-09-11", "amount": 590, "rate": "", "details": "", "deducted": false}, {"type": "bank", "date": "2026-10-08", "amount": 436000, "rate": "", "details": "", "deducted": false}, {"type": "sarTransfer", "date": "2026-09-02", "amount": 405, "rate": "", "details": "تحويل من عبدالله لـ خالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-05", "amount": 1330, "rate": "", "details": "تحويل من محمد يوسف لـ خالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-09", "amount": 2050, "rate": "", "details": "تحويل من نزار لـ خالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-02", "amount": 1000, "rate": "", "details": "تحويل من د/ محمد لـ خالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-02", "amount": 5215, "rate": "", "details": "تحويل من رماح لخالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-09", "amount": 1000, "rate": "", "details": "تحويل من نزار لـ خالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-09", "amount": 1500, "rate": "", "details": "تحويل من رماح لـخالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-11", "amount": 2333, "rate": "", "details": "تحويل من عبدالله نور الدين لخالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-11", "amount": 167, "rate": "", "details": "تحويل من نزار لخالد عبدالرحمن", "deducted": true}, {"type": "sarTransfer", "date": "2026-09-15", "amount": 2600, "rate": "", "details": "تحويل من رماح لي مصعب فيصل", "deducted": true}];
+
+(function () {
+  let entries = [];
+  let settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06' };
+  let editingId = null;
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const today = () => {
+    const d = new Date(), p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  };
+  const typeLabel = (t) => t === 'exchange' ? 'صرف' : t === 'sarTransfer' ? 'تحويل ريال' : 'تحويل بنكك';
+
+  function effectiveRate(e) {
+    if (e.rate !== '' && e.rate != null) return Number(e.rate);
+    if (settings.defaultRate !== '' && settings.defaultRate != null) return Number(settings.defaultRate);
+    return null;
+  }
+  function sdgOf(e) {
+    const r = effectiveRate(e);
+    return (e.type !== 'exchange' || r == null) ? null : Number(e.amount) * r;
+  }
+
+  function computeTotals() {
+    const ex = entries.filter(e => e.type === 'exchange');
+    const sarTr = entries.filter(e => e.type === 'sarTransfer');
+    const bank = entries.filter(e => e.type === 'bank');
+    const totalSar = ex.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const totalSdg = ex.reduce((s, e) => s + (sdgOf(e) || 0), 0);
+    const bankTotal = bank.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const sarTrTotal = sarTr.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const sarTrDed = sarTr.filter(e => e.deducted).reduce((s, e) => s + Number(e.amount || 0), 0);
+    const cnt = ex.filter(e => (e.date || '') >= (settings.commFrom || '0000-00-00')).length;
+    const comm = Number(settings.commFixed || 0) + cnt * Number(settings.commPer || 0);
+    return {
+      totalSar, totalSdg, bankTotal, sarTrTotal, comm,
+      remSar: totalSar - sarTrDed,
+      remSdg: bankTotal - totalSdg - comm
+    };
+  }
+
+  function renderKpis() {
+    const t = computeTotals();
+    $('kTotalSar').textContent = fmt(t.totalSar);
+    $('kTotalSdg').textContent = fmt(t.totalSdg);
+    $('kBank').textContent = fmt(t.bankTotal);
+    $('kSarTr').textContent = fmt(t.sarTrTotal);
+    $('kRemSar').textContent = fmt(t.remSar);
+    $('kComm').textContent = fmt(t.comm);
+    $('kRemSdg').textContent = fmt(t.remSdg);
+  }
+
+  function renderList() {
+    const q = $('search').value.trim().toLowerCase();
+    const ft = $('filterType').value;
+    const list = $('list');
+    list.textContent = '';
+    const items = entries
+      .filter(e => ft === 'all' || e.type === ft)
+      .filter(e => !q || (e.details || '').toLowerCase().includes(q) || String(e.amount).includes(q))
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+
+    if (!items.length) {
+      const em = document.createElement('div'); em.className = 'empty'; em.textContent = 'لا توجد حركات';
+      list.appendChild(em); return;
+    }
+    for (const e of items) {
+      const div = document.createElement('div'); div.className = 'entry';
+      const top = document.createElement('div'); top.className = 'top';
+      const tag = document.createElement('span');
+      tag.className = 'tag' + (e.type === 'sarTransfer' ? ' transfer' : e.type === 'bank' ? ' bank' : '');
+      tag.textContent = typeLabel(e.type);
+      const date = document.createElement('span'); date.className = 'meta'; date.textContent = e.date || '';
+      top.append(tag, date); div.appendChild(top);
+
+      const amounts = document.createElement('div');
+      if (e.type === 'exchange') {
+        const r = effectiveRate(e), s = sdgOf(e);
+        amounts.textContent = fmt(e.amount) + ' ريال × ' + (r == null ? '—' : fmt(r)) + ' = ' + (s == null ? '—' : fmt(s)) + ' سوداني';
+      } else if (e.type === 'sarTransfer') amounts.textContent = fmt(e.amount) + ' ريال';
+      else amounts.textContent = fmt(e.amount) + ' سوداني';
+      div.appendChild(amounts);
+
+      if (e.details) { const d = document.createElement('div'); d.className = 'meta'; d.textContent = e.details; div.appendChild(d); }
+      if (e.deducted) { const d = document.createElement('div'); d.className = 'ded'; d.textContent = 'مخصوم'; div.appendChild(d); }
+
+      const row = document.createElement('div'); row.className = 'actions';
+      const edit = document.createElement('button'); edit.className = 'edit'; edit.textContent = 'تعديل';
+      edit.addEventListener('click', () => startEdit(e));
+      const del = document.createElement('button'); del.className = 'danger'; del.textContent = 'حذف';
+      del.addEventListener('click', () => {
+        if (confirm('تأكيد الحذف؟')) db.ref('ledger/' + e.id).remove();
+      });
+      row.append(edit, del); div.appendChild(row);
+      list.appendChild(div);
+    }
+  }
+
+  function renderNames() {
+    const dl = $('names'); dl.textContent = '';
+    [...new Set(entries.map(e => (e.details || '').trim()).filter(Boolean))].forEach(n => {
+      const o = document.createElement('option'); o.value = n; dl.appendChild(o);
+    });
+  }
+
+  function updateFormForType() {
+    const t = $('type').value;
+    $('amountLabel').textContent = t === 'bank' ? 'المبلغ بالسوداني' : 'المبلغ بالريال';
+    $('rateWrap').style.display = t === 'exchange' ? '' : 'none';
+    $('dedWrap').style.display = t === 'bank' ? 'none' : '';
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const t = $('type').value, amt = Number($('amount').value);
+    if (t !== 'exchange' || !amt) { $('preview').textContent = ''; return; }
+    const r = $('rate').value !== '' ? Number($('rate').value) : (settings.defaultRate !== '' ? Number(settings.defaultRate) : null);
+    $('preview').textContent = r == null ? 'اكتب سعر الصرف أو سعر اليوم' : 'المبلغ بالسوداني: ' + fmt(amt * r);
+  }
+
+  function resetForm() {
+    editingId = null;
+    $('formTitle').textContent = 'إضافة حركة';
+    $('saveBtn').textContent = 'إضافة';
+    $('cancelBtn').classList.add('hidden');
+    $('amount').value = ''; $('rate').value = ''; $('details').value = '';
+    $('deducted').checked = false; $('date').value = today();
+    updatePreview();
+  }
+
+  function startEdit(e) {
+    editingId = e.id;
+    $('formTitle').textContent = 'تعديل حركة';
+    $('saveBtn').textContent = 'حفظ التعديل';
+    $('cancelBtn').classList.remove('hidden');
+    $('type').value = e.type;
+    $('date').value = e.date || today();
+    $('amount').value = e.amount;
+    $('rate').value = e.rate === '' || e.rate == null ? '' : e.rate;
+    $('details').value = e.details || '';
+    $('deducted').checked = !!e.deducted;
+    updateFormForType();
+    window.scrollTo({ top: $('formTitle').offsetTop - 10, behavior: 'smooth' });
+  }
+
+  function saveEntry() {
+    const type = $('type').value;
+    const amount = Number($('amount').value);
+    if (!amount || amount <= 0) { alert('اكتب المبلغ'); return; }
+    const rate = type === 'exchange' && $('rate').value !== '' ? Number($('rate').value) : '';
+    if (type === 'exchange' && rate === '' && (settings.defaultRate === '' || settings.defaultRate == null)) {
+      alert('اكتب سعر الصرف أو سعر اليوم'); return;
+    }
+    const obj = {
+      type, amount, rate,
+      date: $('date').value || today(),
+      details: $('details').value.trim(),
+      deducted: type === 'bank' ? false : $('deducted').checked
+    };
+    if (editingId) {
+      db.ref('ledger/' + editingId).update(obj).then(resetForm);
+    } else {
+      obj.createdAt = firebase.database.ServerValue.TIMESTAMP;
+      db.ref('ledger').push(obj).then(resetForm);
+    }
+  }
+
+  function writeSettings() {
+    const s = {
+      defaultRate: $('defaultRate').value,
+      commFixed: Number($('commFixed').value || 0),
+      commPer: Number($('commPer').value || 0),
+      commFrom: $('commFrom').value || '2026-09-06'
+    };
+    db.ref('settings').set(s);
+  }
+
+  function bind() {
+    $('type').addEventListener('change', updateFormForType);
+    $('amount').addEventListener('input', updatePreview);
+    $('rate').addEventListener('input', updatePreview);
+    $('saveBtn').addEventListener('click', saveEntry);
+    $('cancelBtn').addEventListener('click', resetForm);
+    $('search').addEventListener('input', renderList);
+    $('filterType').addEventListener('change', renderList);
+    ['defaultRate', 'commFixed', 'commPer', 'commFrom'].forEach(id => $(id).addEventListener('input', writeSettings));
+    $('logoutBtn').addEventListener('click', () => auth.signOut());
+    $('importBtn').addEventListener('click', importSeed);
+    $('loginBtn').addEventListener('click', login);
+    $('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  }
+
+  function login() {
+    $('loginStatus').textContent = 'جاري الدخول...';
+    auth.signInWithEmailAndPassword($('email').value.trim(), $('password').value)
+      .catch(() => { $('loginStatus').textContent = 'البريد أو كلمة السر غلط'; });
+  }
+
+  function importSeed() {
+    if (!confirm('هيتم إضافة ' + SEED.length + ' حركة من الإكسل. متعملش ده مرتين. تكمل؟')) return;
+    const ref = db.ref('ledger');
+    const updates = {};
+    SEED.forEach((row, i) => {
+      const key = ref.push().key;
+      updates[key] = { ...row, createdAt: 1000 + i };
+    });
+    ref.update(updates).then(() => alert('تم الاستيراد')).catch(err => alert('فشل: ' + err.message));
+  }
+
+  function startData() {
+    db.ref('ledger').on('value', snap => {
+      const v = snap.val() || {};
+      entries = Object.entries(v).map(([id, x]) => ({ id, ...x }));
+      $('importBtn').classList.toggle('hidden', entries.length > 0);
+      renderKpis(); renderList(); renderNames();
+    });
+    db.ref('settings').on('value', snap => {
+      settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06', ...(snap.val() || {}) };
+      if (document.activeElement !== $('defaultRate')) $('defaultRate').value = settings.defaultRate ?? '';
+      if (document.activeElement !== $('commFixed')) $('commFixed').value = settings.commFixed ?? 4260;
+      if (document.activeElement !== $('commPer')) $('commPer').value = settings.commPer ?? 110;
+      $('commFrom').value = settings.commFrom || '2026-09-06';
+      renderKpis(); updatePreview();
+    });
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      $('loginCard').classList.add('hidden');
+      $('app').classList.remove('hidden');
+      $('date').value = today();
+      startData();
+    } else {
+      $('loginCard').classList.remove('hidden');
+      $('app').classList.add('hidden');
+      $('loginStatus').textContent = '';
+    }
+  });
+
+  bind();
+  updateFormForType();
+})();
+</script>
+</body>
+</html>
