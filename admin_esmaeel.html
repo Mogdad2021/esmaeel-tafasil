@@ -145,6 +145,37 @@
   .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 18px; }
   .counter { color: var(--lime); }
 
+  /* ---------- summary cards (same design as the display page) ---------- */
+  .sbal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .sbal { border-radius: 28px; padding: 40px 44px; display: flex; flex-direction: column; gap: 20px; min-width: 0; border: 1px solid var(--edge); }
+  .sbal .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .sbal .lbl { font-size: clamp(17px, 1.5vw, 22px); font-weight: 600; }
+  .sbadge { font-size: 16px; font-weight: 700; padding: 6px 12px; border-radius: 10px; letter-spacing: .08em; direction: ltr; unicode-bidi: isolate; }
+  .sbal .big { font-size: clamp(64px, 8vw, 116px); font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+  .sdg-card { background: linear-gradient(160deg, #C4EE2B, #A9D41E); color: #0F2009; border-color: transparent; }
+  .sdg-card .lbl { opacity: .85; }
+  .sdg-card .sbadge { background: rgba(15,32,9,.12); }
+  .sar-card { background: linear-gradient(170deg, #1E3B17, #0F2009); color: var(--text); border-color: rgba(232,199,106,.35); }
+  .sar-card .lbl { color: var(--muted); }
+  .sar-card .big { color: var(--gold); }
+  .sar-card .sbadge { background: rgba(232,199,106,.16); color: var(--gold); }
+  .schips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .schip { font-size: 16px; padding: 8px 14px; border-radius: 999px; background: rgba(232,199,106,.14); color: var(--gold); }
+  .schip b { font-weight: 700; }
+  .skpis { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .skpi { background: var(--card); border: 1px solid var(--edge); border-radius: 24px; padding: 32px 36px; display: flex; flex-direction: column; gap: 14px; }
+  .skpi .lbl { font-size: 18px; color: var(--muted); }
+  .skpi .val { font-size: clamp(34px, 3.6vw, 44px); font-weight: 700; color: var(--lime); }
+
+  /* clock + action buttons (header) */
+  .top-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: flex-end; }
+  .clock { text-align: end; }
+  .clock .time { font-size: 36px; font-weight: 600; line-height: 1.1; }
+  .clock .date { font-size: 16px; color: var(--muted); margin-top: 2px; }
+  .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  input[type="date"] { color-scheme: dark; }
+  .date-hint { font-size: 14px; color: var(--lime); margin-top: 6px; min-height: 18px; }
+
   /* ---------- responsive ---------- */
   @media (max-width: 900px) {
     body { padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
@@ -152,8 +183,22 @@
     h1 { font-size: 18px; }
     .sub { font-size: 12px; margin-top: 2px; }
     header.top { margin-bottom: 18px; gap: 14px; }
-    .top-actions { width: 100%; justify-content: space-between; }
-    .top-actions .btn-primary, .top-actions .btn-ghost { flex: 1; }
+    .top-right { width: 100%; justify-content: space-between; gap: 12px; }
+    .clock { text-align: start; }
+    .clock .time { font-size: 18px; }
+    .clock .date { font-size: 12px; }
+    .btns { width: 100%; }
+    .btns .btn-primary, .btns .btn-ghost { flex: 1; }
+    .sbal-grid { grid-template-columns: 1fr; gap: 14px; margin-bottom: 14px; }
+    .sbal { border-radius: 22px; padding: 22px; gap: 14px; }
+    .sbal .lbl { font-size: 15px; }
+    .sbadge { font-size: 13px; }
+    .sbal .big { font-size: 56px; line-height: 1.05; }
+    .schip { font-size: 12px; padding: 5px 10px; }
+    .skpis { gap: 10px; margin-bottom: 14px; }
+    .skpi { padding: 16px; gap: 8px; border-radius: 16px; }
+    .skpi .lbl { font-size: 13px; }
+    .skpi .val { font-size: 20px; }
     .two { grid-template-columns: 1fr; gap: 14px; margin-bottom: 14px; }
     .grid2 { grid-template-columns: 1fr 1fr; gap: 10px; }
     .pad { padding: 18px; }
@@ -213,12 +258,50 @@
           <div class="sub">لوحة الإدارة</div>
         </div>
       </div>
-      <div class="top-actions">
-        <button class="btn-primary" id="newBtn">+ حركة جديدة</button>
-        <button class="btn-ghost" id="logoutBtn">خروج</button>
-        <button class="btn-ghost hidden" id="importBtn">استيراد بيانات الإكسل (مرة واحدة)</button>
+      <div class="top-right">
+        <div class="clock">
+          <div class="time num" id="clockTime">--:--</div>
+          <div class="date" id="clockDate"></div>
+        </div>
+        <div class="btns">
+          <button class="btn-primary" id="newBtn">+ إضافة حركة</button>
+          <button class="btn-ghost" id="logoutBtn">خروج</button>
+          <button class="btn-ghost hidden" id="importBtn">استيراد بيانات الإكسل (مرة واحدة)</button>
+        </div>
       </div>
     </header>
+
+    <!-- summary (same design as the display page) -->
+    <section class="sbal-grid">
+      <div class="sbal sdg-card">
+        <div class="row">
+          <span class="lbl">الرصيد المتبقي - الجنيه السوداني</span>
+          <span class="sbadge">SDG</span>
+        </div>
+        <div class="big num" id="kRemSdg">0</div>
+      </div>
+      <div class="sbal sar-card">
+        <div class="row">
+          <span class="lbl">الرصيد المتبقي - الريال السعودي</span>
+          <span class="sbadge">SAR</span>
+        </div>
+        <div class="big num" id="kRemSar">0</div>
+        <div class="schips">
+          <span class="schip">إجمالي الريال: <b class="num" id="kTotalSar">0</b></span>
+          <span class="schip">تحويلات الريال: <b class="num" id="kSarTr">0</b></span>
+        </div>
+      </div>
+    </section>
+    <section class="skpis">
+      <div class="skpi">
+        <div class="lbl">إجمالي السوداني (صرف)</div>
+        <div class="val num" id="kTotalSdg">0</div>
+      </div>
+      <div class="skpi">
+        <div class="lbl">تحويلات بنكك</div>
+        <div class="val num" id="kBank">0</div>
+      </div>
+    </section>
 
     <!-- settings + form -->
     <section class="two">
@@ -234,7 +317,7 @@
           <div class="field"><label for="defaultRate">سعر اليوم (الافتراضي)</label><input type="number" id="defaultRate" inputmode="decimal" placeholder="اكتب السعر"></div>
           <div class="field"><label for="commFixed">العمولة الثابتة</label><input type="number" id="commFixed" inputmode="decimal"></div>
           <div class="field"><label for="commPer">عمولة لكل صرف</label><input type="number" id="commPer" inputmode="decimal"></div>
-          <div class="field"><label for="commFrom">تبدأ العمولة من تاريخ</label><input type="date" id="commFrom"></div>
+          <div class="field"><label for="commFrom">تبدأ العمولة من تاريخ</label><input type="date" id="commFrom" lang="en-GB" dir="ltr"><div class="date-hint" id="commFromHint"></div></div>
         </div>
         <div class="note-box">أي صرف ليس له سعر خاص يأخذ سعر اليوم الافتراضي.</div>
       </div>
@@ -257,7 +340,7 @@
           <option value="bank">تحويل بنكك (سوداني)</option>
         </select>
         <div class="grid2 mt">
-          <div class="field"><label for="date">التاريخ</label><input type="date" id="date"></div>
+          <div class="field"><label for="date">التاريخ</label><input type="date" id="date" lang="en-GB" dir="ltr"><div class="date-hint" id="dateHint"></div></div>
           <div class="field"><label for="amount" id="amountLabel">المبلغ بالريال</label><input type="number" id="amount" inputmode="decimal"></div>
           <div class="field" id="rateWrap"><label for="rate">سعر التحويل (اختياري)</label><input type="number" id="rate" inputmode="decimal" placeholder="يأخذ سعر اليوم"></div>
           <div class="field"><label for="details">التفاصيل</label><input type="text" id="details" list="names" placeholder="مثال: مع نزار خالد"><datalist id="names"></datalist></div>
@@ -466,7 +549,20 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     updatePreview();
   }
 
+  function showDateHint(inputId, hintId) {
+    const v = $(inputId).value;
+    const hint = $(hintId);
+    if (!v) { hint.textContent = ''; return; }
+    const d = new Date(v + 'T00:00:00');
+    hint.textContent = isNaN(d) ? '' : new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(d);
+  }
+  function refreshDateHints() {
+    showDateHint('date', 'dateHint');
+    showDateHint('commFrom', 'commFromHint');
+  }
+
   function updatePreview() {
+    refreshDateHints();
     const t = $('type').value, amt = Number($('amount').value);
     if (t !== 'exchange' || !amt) { $('preview').textContent = ''; return; }
     const r = $('rate').value !== '' ? Number($('rate').value) : (settings.defaultRate !== '' ? Number(settings.defaultRate) : null);
@@ -536,7 +632,30 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
   }
 
   // ===== data =====
+  function renderKpis() {
+    const t = computeTotals();
+    const put = (id, v) => { const n = $(id); if (n) n.textContent = fmt(v); };
+    put('kRemSdg', t.remSdg);
+    put('kRemSar', t.remSar);
+    put('kTotalSar', t.totalSar);
+    put('kSarTr', t.sarTrTotal);
+    put('kTotalSdg', t.totalSdg);
+    put('kBank', t.bankTotal);
+  }
+
+  function updateClock() {
+    const now = new Date();
+    $('clockTime').textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(now);
+    $('clockDate').textContent = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+  }
+  function scheduleClock() {
+    updateClock();
+    const ms = 60000 - (Date.now() % 60000) + 50;
+    setTimeout(() => { updateClock(); setInterval(updateClock, 60000); }, ms);
+  }
+
   function renderAll() {
+    renderKpis();
     renderList();
     updatePreview();
   }
@@ -579,6 +698,10 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
   function bind() {
     $('type').addEventListener('change', updateFormForType);
     $('amount').addEventListener('input', updatePreview);
+    $('date').addEventListener('input', refreshDateHints);
+    $('date').addEventListener('change', refreshDateHints);
+    $('commFrom').addEventListener('input', refreshDateHints);
+    $('commFrom').addEventListener('change', refreshDateHints);
     $('rate').addEventListener('input', updatePreview);
     $('saveBtn').addEventListener('click', saveEntry);
     $('cancelBtn').addEventListener('click', resetForm);
@@ -614,6 +737,7 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
   });
 
   bind();
+  scheduleClock();
   updateFormForType();
 })();
 </script>
