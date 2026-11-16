@@ -137,6 +137,26 @@
     .calc .note, .calc .hint { font-size: 12px; padding-inline-start: 30px; }
   }
 
+  /* ===== per-type layout ===== */
+  .details { font-size: 20px; color: var(--text); line-height: 1.5; overflow-wrap: anywhere; }
+  .big-amt { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .big-amt .v { font-size: clamp(40px, 4.4vw, 56px); font-weight: 700; line-height: 1.05; }
+  .big-amt .v.sar { color: var(--gold); }
+  .big-amt .v.sdg { color: var(--lime); }
+  .big-amt .u { font-size: 20px; color: var(--muted); }
+  .cl.res .v.sdg { font-size: clamp(30px, 3.2vw, 40px); }
+  .cl.res .u { font-size: 20px; }
+  .amt-box { background: rgba(255,255,255,.035); border: 1px solid var(--edge); border-radius: 16px;
+    padding: 16px 20px; display: grid; gap: 10px; }
+  @media (max-width: 900px) {
+    .details { font-size: 16px; }
+    .big-amt .v { font-size: 38px; }
+    .big-amt .u { font-size: 15px; }
+    .cl.res .v.sdg { font-size: 28px; }
+    .cl.res .u { font-size: 15px; }
+    .amt-box { padding: 12px 14px; gap: 8px; border-radius: 14px; }
+  }
+
   /* loading skeleton */
   @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
   body.loading .num {
@@ -380,7 +400,8 @@ const db = firebase.database();
   }
 
   // ===== latest transactions (rate and commission are not shown here) =====
-  // one line of the calculation: symbol | value + unit
+  const vEl = (text, cls) => el('span', 'v num ' + (cls || ''), text);
+  const uEl = (text) => el('span', 'u', text);
   function calcLine(cls, sym, parts) {
     const row = el('div', 'cl ' + (cls || ''));
     row.appendChild(el('span', 'sym', sym || ''));
@@ -389,28 +410,31 @@ const db = firebase.database();
     row.appendChild(content);
     return row;
   }
-  const vEl = (text, cls) => el('span', 'v num ' + (cls || ''), text);
-  const uEl = (text) => el('span', 'u', text);
 
-  // shows how the amount was calculated, using only the stored fields of this entry
-  function buildCalc(e) {
-    const box = el('div', 'calc');
-    if (e.type === 'exchange') {
-      const s = sdgOf(e);
-      box.appendChild(calcLine('', '', [vEl(fmt(e.amount), 'sar'), uEl('ريال سعودي')]));
-      if (e.rate !== '' && e.rate != null) {
-        box.appendChild(calcLine('mid', '×', [uEl('سعر التحويل'), vEl(fmt(e.rate), 'mid')]));
-      } else {
-        box.appendChild(calcLine('mid', '×', [uEl('بسعر اليوم')]));
-      }
-      box.appendChild(calcLine('res', '=', [vEl(s == null ? '—' : fmt(s), 'sdg'), uEl('جنيه سوداني')]));
-    } else if (e.type === 'sarTransfer') {
-      box.appendChild(calcLine('', '', [vEl(fmt(e.amount), 'sar'), uEl('ريال سعودي')]));
-      box.appendChild(el('div', 'note', 'تحويل بالريال السعودي، لا يوجد فيه سعر صرف'));
-    } else {
-      box.appendChild(calcLine('', '', [vEl(fmt(e.amount), 'sdg'), uEl('جنيه سوداني')]));
-      box.appendChild(el('div', 'note', 'تحويل بنكي بالجنيه السوداني'));
+  // body of one card, by type. Only fields stored on the entry are used.
+  function buildBody(e) {
+    if (e.type === 'sarTransfer') {
+      // details sit directly above the big riyal amount
+      const wrap = el('div', 'big-amt');
+      wrap.append(vEl(fmt(e.amount), 'sar'), uEl('ريال سعودي'));
+      return wrap;
     }
+    if (e.type === 'bank') {
+      // bank transfer: amount only
+      const wrap = el('div', 'big-amt');
+      wrap.append(vEl(fmt(e.amount), 'sdg'), uEl('جنيه سوداني'));
+      return wrap;
+    }
+    // exchange: amount x rate = result
+    const box = el('div', 'amt-box');
+    const s = sdgOf(e);
+    box.appendChild(calcLine('', '', [vEl(fmt(e.amount), 'sar'), uEl('ريال سعودي')]));
+    if (e.rate !== '' && e.rate != null) {
+      box.appendChild(calcLine('mid', '×', [uEl('سعر التحويل'), vEl(fmt(e.rate), 'mid')]));
+    } else {
+      box.appendChild(calcLine('mid', '×', [uEl('بسعر اليوم')]));
+    }
+    box.appendChild(calcLine('res', '=', [vEl(s == null ? '—' : fmt(s), 'sdg'), uEl('جنيه سوداني')]));
     return box;
   }
 
@@ -437,22 +461,21 @@ const db = firebase.database();
     for (const e of items) {
       const card = el('div', 'item');
 
+      // top row: type, status, date
       const head = el('div', 'item-head');
-      const start = el('div', 'start');
-      start.appendChild(el('span', 'kind' + (e.type === 'sarTransfer' ? ' transfer' : e.type === 'bank' ? ' bank' : ''), typeLabel(e.type)));
-      if (e.details) {
-        const lab = e.type === 'sarTransfer' ? 'التفاصيل' : 'العميل';
-        const party = el('span', 'party');
-        party.appendChild(el('span', 'lab', lab));
-        party.appendChild(document.createTextNode(e.details));
-        start.appendChild(party);
-      }
+      head.appendChild(el('span', 'kind' + (e.type === 'sarTransfer' ? ' transfer' : e.type === 'bank' ? ' bank' : ''), typeLabel(e.type)));
       const endMeta = el('div', 'end-meta');
       endMeta.appendChild(el('span', 'when num', e.date || ''));
       endMeta.appendChild(el('span', 'status ' + (e.deducted ? 'warn' : 'ok'), e.deducted ? 'مخصوم' : 'مكتمل'));
-      head.append(start, endMeta);
+      head.appendChild(endMeta);
+      card.appendChild(head);
 
-      card.append(head, buildCalc(e));
+      // details (bank transfers show no party or extra details)
+      if (e.type !== 'bank' && e.details) {
+        card.appendChild(el('div', 'details', e.details));
+      }
+
+      card.appendChild(buildBody(e));
       list.appendChild(card);
     }
   }
