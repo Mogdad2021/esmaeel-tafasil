@@ -6,167 +6,461 @@
 <title>تفاصيل التحاويل الخاصه بـ خ اسماعيل - إدارة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root {
-    --bg: #F8FAFC; --card: #FFFFFF; --text: #1E293B; --muted: #64748B; --border: #E2E8F0;
-    --gold: #B45309; --green: #15803D; --red: #B91C1C; --accent: #1E3A8A;
+    --ink: #0F2009;
+    --green: #1B3314;
+    --green2: #3F5235;
+    --sage: #6B7A60;
+    --line: #E3E9D9;
+    --line2: #EEF2E7;
+    --bg: #F5F7F1;
+    --card: #FFFFFF;
+    --lime: #C4EE2B;
+    --lime2: #EDF8C9;
+    --pos: #17733A;
+    --neg: #B0281E;
+    --warn: #8F5A00;
+    --shadow: 0 1px 0 rgba(15,32,9,.03), 0 8px 24px -16px rgba(15,32,9,.12);
+    --shadow-hover: 0 1px 0 rgba(15,32,9,.03), 0 14px 30px -18px rgba(15,32,9,.18);
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: 'Tajawal', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text);
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(24px + env(safe-area-inset-bottom, 0px));
-    font-size: 16px;
+    font-family: 'IBM Plex Sans Arabic', Tahoma, Arial, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 15px;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 960px; margin: 0 auto; }
-  h1 { font-size: 20px; margin: 0 0 12px; color: var(--accent); }
-  h2 { font-size: 16px; margin: 0 0 10px; color: var(--accent); }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
-  @media (min-width: 720px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
-  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-  .kpi .label { font-size: 13px; color: var(--muted); }
-  .kpi .val { font-size: 20px; font-weight: 700; margin-top: 4px; word-break: break-all; }
-  .gold { color: var(--gold); } .green { color: var(--green); } .red { color: var(--red); }
-  .form-grid { display: grid; gap: 10px; }
-  @media (min-width: 720px) { .form-grid { grid-template-columns: repeat(3, 1fr); } }
-  .settings-row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
-  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-  input, select {
-    width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid var(--border);
-    border-radius: 8px; background: #fff; color: var(--text);
+  .num {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums;
+    letter-spacing: .01em; display: inline-block;
   }
-  .check { display: flex; align-items: center; gap: 8px; padding-top: 22px; }
-  .check input { width: 20px; height: 20px; }
-  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  button { font: inherit; font-size: 16px; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: #fff; }
-  button.secondary { background: #E2E8F0; color: var(--text); }
-  button.danger { background: #FEE2E2; color: var(--red); padding: 6px 10px; font-size: 14px; }
-  button.edit { background: #EFF6FF; color: var(--accent); padding: 6px 10px; font-size: 14px; }
-  .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-  .entry { border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: grid; gap: 6px; }
-  .entry .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #EFF6FF; color: var(--accent); }
-  .tag.transfer { background: #FFF7ED; color: var(--gold); }
-  .tag.bank { background: #F0FDF4; color: var(--green); }
-  .meta { font-size: 14px; color: var(--muted); }
-  .ded { font-size: 12px; color: var(--red); }
-  .filter { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-  .filter input { flex: 1; min-width: 160px; }
-  .empty { text-align: center; color: var(--muted); padding: 20px 0; }
-  .status { font-size: 13px; color: var(--muted); margin-top: 8px; }
   .hidden { display: none !important; }
+  h1, h2, p { margin: 0; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 12px; min-height: 44px;
+    padding: 10px 18px; font-size: 15px; font-weight: 600; transition: transform .08s, background-color .2s, color .2s; }
+  button:active { transform: translateY(1px); }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline: none; box-shadow: 0 0 0 4px rgba(196,238,43,.55);
+  }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: #142A10; }
+  .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: #F6F9F0; }
+  .btn-soft { background: #EEF4E4; color: var(--green); min-height: 36px; padding: 6px 12px; font-size: 14px; border-radius: 9px; }
+  .btn-danger { background: #fff; color: var(--neg); border: 1px solid #F2D3CF; min-height: 36px; padding: 6px 12px; font-size: 14px; border-radius: 9px; }
+  .btn-danger:hover { background: #FBEAE8; }
+  .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--line); width: 100%; }
+  input, select {
+    width: 100%; font: inherit; font-size: 16px; height: 46px; padding: 10px 14px;
+    border: 1px solid var(--line); border-radius: 12px; background: #FBFCF8; color: var(--ink);
+  }
+  input:focus, select:focus { border-color: var(--green); }
+  input[type="number"] { direction: ltr; text-align: right; }
+  label { display: block; font-size: 13px; color: var(--sage); margin-bottom: 6px; }
+
+  /* ---------- login ---------- */
+  .login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+  .login-card { width: min(420px, 100%); background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 28px; box-shadow: var(--shadow); }
+  .login-card h2 { font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 18px; }
+  .login-card .field + .field { margin-top: 12px; }
+  .login-card .actions { margin-top: 18px; }
+  .login-card .btn-primary { width: 100%; }
+  .status { font-size: 13px; color: var(--sage); margin-top: 10px; min-height: 18px; }
+
+  /* ---------- layout ---------- */
+  .sidebar {
+    position: fixed; top: 0; bottom: 0; inset-inline-start: 0; width: 264px; z-index: 50;
+    background: #fff; border-inline-end: 1px solid var(--line);
+    display: flex; flex-direction: column; padding: 26px 18px; transition: transform .25s ease;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; padding: 0 6px 24px; }
+  .mark { width: 42px; height: 42px; border-radius: 13px; background: var(--green); color: var(--lime);
+    display: grid; place-items: center; font-size: 20px; font-weight: 700; flex: none; }
+  .brand-name { font-weight: 700; font-size: 16px; }
+  .brand-sub { font-size: 12px; color: var(--sage); margin-top: 2px; }
+  .nav { display: flex; flex-direction: column; gap: 4px; }
+  .nav a {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px;
+    color: var(--green2); text-decoration: none; font-size: 15px; font-weight: 500; min-height: 44px;
+    transition: background-color .2s, color .2s;
+  }
+  .nav a svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .nav a:hover { background: #EEF4E4; color: var(--ink); }
+  .nav a.on { background: var(--green); color: #fff; }
+  .nav a.on::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); margin-inline-start: auto; }
+  .side-foot { margin-top: auto; display: grid; gap: 16px; padding: 0 6px; }
+  .user { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--lime2); color: var(--green); display: grid; place-items: center; font-weight: 700; }
+  .uname { font-weight: 600; font-size: 14px; }
+  .urole { font-size: 12px; color: var(--sage); }
+  .scrim { display: none; }
+
+  .main { margin-inline-start: 264px; padding: 30px 40px 56px; min-width: 0; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .titles .date { color: var(--sage); font-size: 14px; }
+  .titles h1 { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .search { width: 220px; height: 44px; }
+  .menu-btn, .m-logout { display: none; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); min-width: 0; }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .card h2 { font-size: 18px; font-weight: 700; }
+  .sub { margin-top: 4px; color: var(--sage); font-size: 13px; }
+  .pad { padding: 24px; }
+  .badge { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .badge.pos { background: #E6F4EB; color: var(--pos); }
+  .badge.neg { background: #FBEAE8; color: var(--neg); }
+  .badge.lime { background: var(--lime2); color: var(--green); }
+  .badge.warn { background: #FFF3DC; color: var(--warn); }
+  .badge.ok { background: #E6F4EB; color: var(--pos); }
+  .muted { color: var(--sage); }
+  .pos-t { color: var(--pos); } .neg-t { color: var(--neg); }
+
+  /* flash feedback on value change */
+  @keyframes fGood { from { background-color: rgba(196,238,43,.35); } to { background-color: var(--base, #fff); } }
+  @keyframes fBad  { from { background-color: rgba(176,40,30,.18); } to { background-color: var(--base, #fff); } }
+  .flash-good { animation: fGood 1.1s ease-out; }
+  .flash-bad  { animation: fBad 1.1s ease-out; }
+
+  /* hero balance */
+  .hero { --base: var(--green); background: var(--green); border-color: var(--green); color: #F3F7EC;
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; align-items: center;
+    padding: 28px 30px; margin-bottom: 16px; border-radius: 18px; box-shadow: var(--shadow); }
+  .hero .lbl { color: #B5C9A0; font-size: 13px; }
+  .hero .big { font-size: 52px; font-weight: 700; color: var(--lime); line-height: 1.1; margin: 8px 0; }
+  .hero .note { color: #B5C9A0; font-size: 13px; }
+  .split-legend { display: flex; justify-content: space-between; margin-top: 10px; color: #B5C9A0; font-size: 13px; }
+  .split-legend b { color: #F3F7EC; font-weight: 700; }
+  .bar { height: 12px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; display: flex; direction: ltr; }
+  .bar > div { height: 100%; width: 0; transition: width .9s ease; }
+  .b-exch { background: var(--lime); }
+  .b-bank { background: #7FA65A; }
+  .hero .lbl-row { display: flex; justify-content: space-between; color: #B5C9A0; font-size: 13px; margin-bottom: 10px; }
+
+  /* kpis */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .kpi { --base: #fff; padding: 20px 22px; transition: box-shadow .25s; }
+  .kpi:hover { box-shadow: var(--shadow-hover); }
+  .kpi .head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .kpi .name { font-size: 13px; color: var(--sage); }
+  .kpi .val { font-size: 24px; font-weight: 700; }
+
+  /* two-column row */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .two > .card { min-width: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid2 .field { min-width: 0; }
+  .mt { margin-top: 16px; }
+  .note-box { margin-top: 16px; background: #F6F9F0; border: 1px solid var(--line2); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--green2); }
+  .hint { font-size: 13px; color: var(--sage); margin-top: 10px; min-height: 18px; }
+  .actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .check-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+  .check-row input { width: 18px; height: 18px; accent-color: var(--green); }
+  .check-row label { margin: 0; color: var(--ink); font-size: 15px; }
+  .saved { opacity: 0; transition: opacity .3s; }
+  .saved.on { opacity: 1; }
+
+  .seg { display: inline-flex; background: #F0F4EA; border-radius: 12px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+  .seg button { background: transparent; color: var(--green2); min-height: 38px; padding: 8px 14px; font-size: 14px; font-weight: 600; }
+  .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(15,32,9,.08); }
+
+  /* chart */
+  #chartCard { margin-bottom: 20px; }
+  .chart { position: relative; height: 240px; margin-top: 18px; }
+  .chart svg { display: block; width: 100%; height: 240px; overflow: visible; }
+  .chart .tip { position: absolute; transform: translate(-50%, -125%); background: var(--green); color: #fff;
+    border-radius: 10px; padding: 6px 10px; font-size: 13px; white-space: nowrap; pointer-events: none; display: none; }
+  .chart .tip .num { font-weight: 700; }
+  .chart .empty { padding: 60px 0; text-align: center; color: var(--sage); }
+
+  /* ledger table */
+  .ledger-head { padding: 22px 24px 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding: 0 16px; overflow-x: auto; }
+  .tab { background: none; color: var(--sage); border-radius: 0; padding: 12px 10px; min-height: 46px; white-space: nowrap; font-weight: 600; }
+  .tab.on { color: var(--ink); box-shadow: inset 0 -2px 0 var(--green); }
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  thead th { background: #FAFBF7; font-size: 12px; font-weight: 600; color: var(--sage); text-align: start;
+    padding: 12px 18px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  tbody td { padding: 14px 18px; border-bottom: 1px solid var(--line2); vertical-align: middle; font-size: 14px; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #FAFCF6; }
+  .tag-type { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--lime2); color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .tag-type.bank { background: #F0FDF4; color: var(--pos); }
+  .strong { font-weight: 600; font-size: 15px; }
+  .small { font-size: 12px; }
+  .c-amt > div { display: block; }
+  .c-amt .small { margin-top: 3px; }
+  .c-act { white-space: nowrap; }
+  .c-act button + button { margin-inline-start: 6px; }
+  .c-det .sub-det { color: var(--sage); font-size: 13px; margin-top: 3px; }
+  .c-det .chip { margin-top: 6px; display: inline-block; }
+  .empty-row { text-align: center; color: var(--sage); padding: 28px 0 !important; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1023px) {
+    .sidebar { transform: translateX(100%); box-shadow: 0 0 40px rgba(15,32,9,.18); }
+    body.nav-open .sidebar { transform: none; }
+    body.nav-open .scrim { display: block; position: fixed; inset: 0; background: rgba(15,32,9,.35); z-index: 40; }
+    .main { margin-inline-start: 0; padding: 22px 16px 40px; }
+    .menu-btn, .m-logout { display: inline-flex; }
+    .menu-btn { background: #fff; color: var(--ink); border: 1px solid var(--line); width: 44px; padding: 0; justify-content: center; align-items: center; }
+    .titles { flex: 1; min-width: 0; }
+    .titles h1 { font-size: 20px; }
+    .top-actions { width: 100%; }
+    .top-actions .search { flex: 1 1 100%; width: 100%; }
+    .top-actions .btn-ghost.wide, .top-actions .btn-primary.wide { flex: 1; }
+    .kpis { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .kpis .kpi:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .two { grid-template-columns: 1fr; }
+    .hero { grid-template-columns: 1fr; padding: 22px; }
+    .hero .big { font-size: 56px; }
+  }
+  @media (max-width: 719px) {
+    .kpi .val { font-size: 20px; }
+    .hero .big { font-size: 48px; }
+    .grid2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pad { padding: 18px; }
+    .ledger-head { padding: 18px 16px 14px; }
+    table { min-width: 0; }
+    thead { display: none; }
+    tbody tr { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "type date" "det amt" "rate comm" "act act";
+      gap: 10px 12px; padding: 16px; border-bottom: 1px solid var(--line2); }
+    tbody tr:last-child { border-bottom: 0; }
+    tbody td { padding: 0; border: 0; min-width: 0; }
+    .c-type { grid-area: type; }
+    .c-date { grid-area: date; justify-self: end; font-size: 13px; }
+    .c-det { grid-area: det; }
+    .c-amt { grid-area: amt; justify-self: end; text-align: end; }
+    .c-rate { grid-area: rate; font-size: 12px; }
+    .c-comm { grid-area: comm; justify-self: end; font-size: 12px; }
+    .c-act { grid-area: act; display: flex; gap: 8px; }
+    .c-act button { flex: 1; min-height: 44px; font-size: 14px; }
+    .c-act button + button { margin-inline-start: 0; }
+    .btn-soft, .btn-danger { min-height: 44px; }
+    .search { width: 100%; }
+    input, select { font-size: 16px; }
+    .actions button { flex: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  /* loading skeleton */
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  body.loading .num {
+    color: transparent !important; min-width: 120px; border-radius: 8px;
+    background: linear-gradient(90deg, #EEF2E7 25%, #F8FAF4 50%, #EEF2E7 75%) 0 0 / 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  body.loading .hero .num { background: linear-gradient(90deg, rgba(255,255,255,.06) 25%, rgba(255,255,255,.16) 50%, rgba(255,255,255,.06) 75%) 0 0 / 200% 100%; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>تفاصيل التحاويل الخاصه بـ خ اسماعيل - إدارة</h1>
 
-  <!-- Login -->
-  <div class="card" id="loginCard">
+<!-- Login -->
+<div class="login-wrap" id="loginCard">
+  <div class="login-card">
     <h2>تسجيل الدخول</h2>
-    <div class="form-grid" style="grid-template-columns:1fr">
-      <div><label for="email">البريد الإلكتروني</label><input type="email" id="email" autocomplete="username"></div>
-      <div><label for="password">كلمة السر</label><input type="password" id="password" autocomplete="current-password"></div>
-    </div>
-    <div class="actions"><button id="loginBtn">دخول</button></div>
+    <div class="field"><label for="email">البريد الإلكتروني</label><input type="email" id="email" autocomplete="username"></div>
+    <div class="field"><label for="password">كلمة السر</label><input type="password" id="password" autocomplete="current-password"></div>
+    <div class="actions"><button class="btn-primary" id="loginBtn">دخول</button></div>
     <div class="status" id="loginStatus"></div>
   </div>
+</div>
 
-  <!-- App -->
-  <div id="app" class="hidden">
-    <div class="actions" style="margin:0 0 12px">
-      <button class="secondary" id="logoutBtn">خروج</button>
-      <button class="hidden" id="importBtn">استيراد بيانات الإكسل (مرة واحدة)</button>
+<!-- App -->
+<div id="app" class="hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="mark">ت</div>
+      <div><div class="brand-name">نظام التحاويل</div><div class="brand-sub">إدارة الصرافة</div></div>
     </div>
-
-    <div class="kpis">
-      <div class="kpi"><div class="label">إجمالي الريال</div><div class="val gold" id="kTotalSar">0</div></div>
-      <div class="kpi"><div class="label">إجمالي السوداني (صرف)</div><div class="val green" id="kTotalSdg">0</div></div>
-      <div class="kpi"><div class="label">تحويلات بنكك</div><div class="val green" id="kBank">0</div></div>
-      <div class="kpi"><div class="label">تحويلات الريال</div><div class="val gold" id="kSarTr">0</div></div>
-      <div class="kpi"><div class="label">الريال المتبقي</div><div class="val gold" id="kRemSar">0</div></div>
-      <div class="kpi"><div class="label">عمولات البنك</div><div class="val red" id="kComm">0</div></div>
-      <div class="kpi"><div class="label">الجنيه المتبقي</div><div class="val green" id="kRemSdg">0</div></div>
+    <nav class="nav">
+      <a href="#" data-nav="top" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>لوحة التحكم</span></a>
+      <a href="#" data-nav="ledger"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>الحركات</span></a>
+      <a href="#" data-nav="transfers"><svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg><span>التحويلات</span></a>
+      <a href="#" data-nav="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span>الإعدادات</span></a>
+      <a href="#" data-nav="reports"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>التقارير</span></a>
+    </nav>
+    <div class="side-foot">
+      <div class="user"><div class="avatar">إ</div><div><div class="uname">خ إسماعيل</div><div class="urole">مدير الحسابات</div></div></div>
+      <button class="btn-outline" id="logoutBtn" data-logout>تسجيل الخروج</button>
     </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
 
-    <div class="card">
-      <h2>الإعدادات</h2>
-      <div class="settings-row">
-        <div>
-          <label for="defaultRate">سعر اليوم (الافتراضي)</label>
-          <input type="number" id="defaultRate" inputmode="decimal" placeholder="اكتب السعر">
-          <div class="hint">أي صرف ما لوش سعر خاص بياخد السعر ده.</div>
-        </div>
-        <div>
-          <label for="commFixed">العمولة الثابتة</label>
-          <input type="number" id="commFixed" inputmode="decimal">
+  <main class="main" id="top">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+        <button class="menu-btn" id="menuBtn" aria-label="القائمة">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="titles">
+          <div class="date" id="todayAr"></div>
+          <h1>تفاصيل التحاويل - خ إسماعيل</h1>
         </div>
       </div>
-      <div class="settings-row" style="margin-top:10px">
-        <div>
-          <label for="commPer">عمولة لكل صرف</label>
-          <input type="number" id="commPer" inputmode="decimal">
-        </div>
-        <div>
-          <label for="commFrom">تبدأ العمولة من تاريخ</label>
-          <input type="date" id="commFrom">
-        </div>
+      <div class="top-actions">
+        <input type="text" id="search" class="search" placeholder="بحث بالتفاصيل أو المبلغ" aria-label="بحث">
+        <button class="btn-primary wide" id="newBtn">+ حركة جديدة</button>
+        <button class="btn-ghost m-logout" data-logout>خروج</button>
+        <button class="btn-ghost hidden" id="importBtn">استيراد بيانات الإكسل (مرة واحدة)</button>
       </div>
-    </div>
+    </header>
 
-    <div class="card">
-      <h2 id="formTitle">إضافة حركة</h2>
-      <div class="form-grid">
-        <div>
-          <label for="type">النوع</label>
-          <select id="type">
-            <option value="exchange">صرف (ريال ← سوداني)</option>
-            <option value="sarTransfer">تحويل ريال</option>
-            <option value="bank">تحويل بنكك (سوداني)</option>
-          </select>
-        </div>
-        <div><label for="date">التاريخ</label><input type="date" id="date"></div>
-        <div><label for="amount" id="amountLabel">المبلغ بالريال</label><input type="number" id="amount" inputmode="decimal"></div>
-        <div id="rateWrap">
-          <label for="rate">سعر التحويل (اختياري)</label>
-          <input type="number" id="rate" inputmode="decimal" placeholder="يأخذ سعر اليوم">
-        </div>
-        <div>
-          <label for="details">التفاصيل</label>
-          <input type="text" id="details" list="names" placeholder="مثال: مع نزار خالد">
-          <datalist id="names"></datalist>
-        </div>
-        <div class="check" id="dedWrap">
-          <input type="checkbox" id="deducted">
-          <label for="deducted" style="margin:0;color:var(--text)">مخصوم</label>
+    <!-- hero balance -->
+    <section class="hero" data-flash="1" id="heroCard">
+      <div>
+        <div class="lbl">الرصيد المتبقي بالجنيه السوداني</div>
+        <div class="big num" id="kRemSdg">0</div>
+        <div class="note">يتحدث تلقائياً عند كل حركة</div>
+      </div>
+      <div>
+        <div class="lbl-row"><span>توزيع الحركات</span></div>
+        <div class="bar"><div class="b-exch" id="barExch"></div><div class="b-bank" id="barBank"></div></div>
+        <div class="split-legend">
+          <span><b class="num" id="pctExch">0%</b> صرف</span>
+          <span><b class="num" id="pctBank">0%</b> تحويل</span>
         </div>
       </div>
-      <div class="hint" id="preview"></div>
-      <div class="actions">
-        <button id="saveBtn">إضافة</button>
-        <button class="secondary hidden" id="cancelBtn">إلغاء التعديل</button>
-      </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>الحركات</h2>
-      <div class="filter">
-        <input type="text" id="search" placeholder="بحث بالتفاصيل أو المبلغ">
-        <select id="filterType" style="max-width:200px">
-          <option value="all">الكل</option>
-          <option value="exchange">صرف</option>
+    <!-- kpis SDG -->
+    <section class="kpis">
+      <div class="card kpi" data-flash="1">
+        <div class="head"><span class="name">إجمالي السوداني (صرف)</span><span class="badge pos">مجموع الحركات</span></div>
+        <div class="val num pos-t" id="kTotalSdg">0</div>
+      </div>
+      <div class="card kpi" data-flash="1">
+        <div class="head"><span class="name">تحويلات بنكك</span><span class="badge pos">مجموع التحويلات</span></div>
+        <div class="val num pos-t" id="kBank">0</div>
+      </div>
+      <div class="card kpi" data-flash="1">
+        <div class="head"><span class="name">عمولات البنك</span><span class="badge neg">مخصومة</span></div>
+        <div class="val num neg-t" id="kComm">0</div>
+      </div>
+    </section>
+
+    <!-- kpis SAR -->
+    <section class="kpis">
+      <div class="card kpi" data-flash="1">
+        <div class="head"><span class="name">إجمالي الريال</span><span class="badge lime">مجموع الصرف</span></div>
+        <div class="val num" id="kTotalSar">0</div>
+      </div>
+      <div class="card kpi" data-flash="1">
+        <div class="head"><span class="name">تحويلات الريال</span><span class="badge lime">مجموع التحويلات</span></div>
+        <div class="val num" id="kSarTr">0</div>
+      </div>
+      <div class="card kpi" data-flash="1">
+        <div class="head"><span class="name">الريال المتبقي</span><span class="badge lime">بعد المخصوم</span></div>
+        <div class="val num" id="kRemSar">0</div>
+      </div>
+    </section>
+
+    <!-- settings + form -->
+    <section class="two">
+      <div class="card pad" id="settingsCard">
+        <div class="card-head">
+          <div>
+            <h2>الإعدادات</h2>
+            <p class="sub">أسعار وعمولات تُطبَّق على الحركات الجديدة</p>
+          </div>
+          <span class="badge ok saved" id="saveState">محفوظ</span>
+        </div>
+        <div class="grid2 mt">
+          <div class="field"><label for="commFixed">العمولة الثابتة</label><input type="number" id="commFixed" inputmode="decimal"></div>
+          <div class="field"><label for="defaultRate">سعر اليوم (الافتراضي)</label><input type="number" id="defaultRate" inputmode="decimal" placeholder="اكتب السعر"></div>
+          <div class="field"><label for="commPer">عمولة لكل صرف</label><input type="number" id="commPer" inputmode="decimal"></div>
+          <div class="field"><label for="commFrom">تبدأ العمولة من تاريخ</label><input type="date" id="commFrom"></div>
+        </div>
+        <div class="note-box">أي صرف ليس له سعر خاص يأخذ سعر اليوم الافتراضي.</div>
+      </div>
+
+      <div class="card pad" id="formCard">
+        <div class="card-head">
+          <div>
+            <h2 id="formTitle">إضافة حركة</h2>
+            <p class="sub">سجّل صرفاً أو تحويلاً جديداً</p>
+          </div>
+        </div>
+        <div class="seg mt" role="group" aria-label="نوع الحركة">
+          <button type="button" data-type="exchange" class="on">صرف (ريال ← سوداني)</button>
+          <button type="button" data-type="sarTransfer">تحويل ريال</button>
+          <button type="button" data-type="bank">تحويل بنكك</button>
+        </div>
+        <select id="type" class="hidden" aria-hidden="true">
+          <option value="exchange">صرف (ريال ← سوداني)</option>
           <option value="sarTransfer">تحويل ريال</option>
-          <option value="bank">تحويل بنكك</option>
+          <option value="bank">تحويل بنكك (سوداني)</option>
         </select>
+        <div class="grid2 mt">
+          <div class="field"><label for="date">التاريخ</label><input type="date" id="date"></div>
+          <div class="field"><label for="amount" id="amountLabel">المبلغ بالريال</label><input type="number" id="amount" inputmode="decimal"></div>
+          <div class="field" id="rateWrap"><label for="rate">سعر التحويل (اختياري)</label><input type="number" id="rate" inputmode="decimal" placeholder="يأخذ سعر اليوم"></div>
+          <div class="field"><label for="details">التفاصيل</label><input type="text" id="details" list="names" placeholder="مثال: مع نزار خالد"><datalist id="names"></datalist></div>
+        </div>
+        <div class="check-row" id="dedWrap">
+          <input type="checkbox" id="deducted">
+          <label for="deducted">مخصوم</label>
+        </div>
+        <div class="hint" id="preview"></div>
+        <div class="actions">
+          <button class="btn-primary" id="saveBtn">إضافة الحركة</button>
+          <button class="btn-ghost hidden" id="cancelBtn">إلغاء التعديل</button>
+        </div>
       </div>
-      <div id="list"></div>
-    </div>
-  </div>
+    </section>
+
+    <!-- chart -->
+    <section class="card pad" id="chartCard">
+      <div class="card-head">
+        <div>
+          <h2>حركة الأرصدة</h2>
+          <p class="sub">مرّر المؤشر على الرسم لرؤية القيمة في كل نقطة</p>
+        </div>
+        <div class="seg" role="group" aria-label="نوع الرسم">
+          <button type="button" data-chart="balance" class="on">الرصيد</button>
+          <button type="button" data-chart="bank">التحويلات</button>
+        </div>
+      </div>
+      <div class="chart" id="chart" dir="ltr"></div>
+    </section>
+
+    <!-- ledger table -->
+    <section class="card" id="ledgerCard">
+      <div class="ledger-head">
+        <div>
+          <h2>الحركات</h2>
+          <p class="sub">عدد الحركات: <span class="num" id="ledgerCount">0</span></p>
+        </div>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" data-mode="all">الكل</button>
+        <button type="button" class="tab" data-mode="exchange">صرف</button>
+        <button type="button" class="tab" data-mode="sarTransfer">تحويل ريال</button>
+        <button type="button" class="tab" data-mode="bank">تحويل بنكك</button>
+        <button type="button" class="tab" data-mode="deducted">مخصوم</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>السعر</th><th>العمولة</th><th>التفاصيل</th><th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 </div>
 
 <script>
@@ -180,7 +474,6 @@ const firebaseConfig = {
   messagingSenderId: "600912220481",
   appId: "1:600912220481:web:3626a362de34b006ced1c0"
 };
-// =====================================================
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -192,6 +485,12 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
   let entries = [];
   let settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06' };
   let editingId = null;
+  let filterMode = 'all';
+  let chartMode = 'balance';
+  let ledgerLoaded = false, settingsLoaded = false;
+  let listeners = null;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const NUM_IDS = ['kRemSdg', 'kTotalSdg', 'kBank', 'kComm', 'kTotalSar', 'kSarTr', 'kRemSar'];
 
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -200,7 +499,15 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
   };
   const typeLabel = (t) => t === 'exchange' ? 'صرف' : t === 'sarTransfer' ? 'تحويل ريال' : 'تحويل بنكك';
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const isCounted = (e) => e.type === 'exchange' && (e.date || '') >= (settings.commFrom || '0000-00-00');
 
+  // ===== formulas (unchanged from the original system) =====
   function effectiveRate(e) {
     if (e.rate !== '' && e.rate != null) return Number(e.rate);
     if (settings.defaultRate !== '' && settings.defaultRate != null) return Number(settings.defaultRate);
@@ -210,7 +517,6 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     const r = effectiveRate(e);
     return (e.type !== 'exchange' || r == null) ? null : Number(e.amount) * r;
   }
-
   function computeTotals() {
     const ex = entries.filter(e => e.type === 'exchange');
     const sarTr = entries.filter(e => e.type === 'sarTransfer');
@@ -229,61 +535,139 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     };
   }
 
+  // ===== number animation (display only) =====
+  function animate(node, from, to, dur, delay) {
+    cancelAnimationFrame(node._raf);
+    if (reduceMotion.matches || dur <= 0) { node.textContent = fmt(to); return; }
+    const start = performance.now() + (delay || 0);
+    const step = (now) => {
+      const t = Math.min(1, Math.max(0, (now - start) / dur));
+      const k = 1 - Math.pow(1 - t, 3);
+      node.textContent = t >= 1 ? fmt(to) : fmt(from + (to - from) * k);
+      if (t < 1) node._raf = requestAnimationFrame(step);
+    };
+    node.textContent = fmt(from);
+    node._raf = requestAnimationFrame(step);
+  }
+  function flash(node, good) {
+    const card = node.closest('[data-flash]');
+    if (!card || reduceMotion.matches) return;
+    card.classList.remove('flash-good', 'flash-bad');
+    void card.offsetWidth;
+    card.classList.add(good ? 'flash-good' : 'flash-bad');
+    clearTimeout(card._ft);
+    card._ft = setTimeout(() => card.classList.remove('flash-good', 'flash-bad'), 1200);
+  }
+  function setNum(id, value, invert, index) {
+    const node = $(id);
+    if (!node) return;
+    const to = Number(value) || 0;
+    if (node._cur === undefined) {
+      node._cur = to;
+      animate(node, 0, to, 1000, (index || 0) * 80);
+      return;
+    }
+    if (node._cur === to) return;
+    const from = node._cur;
+    node._cur = to;
+    const up = to > from;
+    flash(node, invert ? !up : up);
+    animate(node, from, to, 900, 0);
+  }
+
   function renderKpis() {
+    if (!(ledgerLoaded && settingsLoaded)) return;
     const t = computeTotals();
-    $('kTotalSar').textContent = fmt(t.totalSar);
-    $('kTotalSdg').textContent = fmt(t.totalSdg);
-    $('kBank').textContent = fmt(t.bankTotal);
-    $('kSarTr').textContent = fmt(t.sarTrTotal);
-    $('kRemSar').textContent = fmt(t.remSar);
-    $('kComm').textContent = fmt(t.comm);
-    $('kRemSdg').textContent = fmt(t.remSdg);
+    setNum('kRemSdg', t.remSdg, false, 0);
+    setNum('kTotalSdg', t.totalSdg, false, 1);
+    setNum('kBank', t.bankTotal, false, 2);
+    setNum('kComm', t.comm, true, 3);
+    setNum('kTotalSar', t.totalSar, false, 4);
+    setNum('kSarTr', t.sarTrTotal, false, 5);
+    setNum('kRemSar', t.remSar, false, 6);
+    const tot = t.totalSdg + t.bankTotal;
+    const pe = tot ? (t.totalSdg / tot) * 100 : 0;
+    $('barExch').style.width = (tot ? pe : 0) + '%';
+    $('barBank').style.width = (tot ? 100 - pe : 0) + '%';
+    $('pctExch').textContent = Math.round(tot ? pe : 0) + '%';
+    $('pctBank').textContent = Math.round(tot ? 100 - pe : 0) + '%';
+  }
+
+  // ===== ledger table =====
+  function visibleItems() {
+    const q = $('search').value.trim().toLowerCase();
+    return entries
+      .filter(e => filterMode === 'all' || (filterMode === 'deducted' ? !!e.deducted : e.type === filterMode))
+      .filter(e => !q || (e.details || '').toLowerCase().includes(q) || String(e.amount).includes(q))
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+  }
+
+  function rowFor(e) {
+    const tr = el('tr');
+
+    const tdType = el('td', 'c-type');
+    tdType.appendChild(el('span', 'tag-type' + (e.type === 'bank' ? ' bank' : ''), typeLabel(e.type)));
+
+    const tdDate = el('td', 'c-date num muted', e.date || '');
+
+    const tdAmt = el('td', 'c-amt');
+    const unit = e.type === 'bank' ? 'سوداني' : 'ريال';
+    tdAmt.appendChild(el('div', 'strong num', fmt(e.amount) + ' ' + unit));
+    if (e.type === 'exchange') {
+      const s = sdgOf(e);
+      tdAmt.appendChild(el('div', 'small muted num', '= ' + (s == null ? '—' : fmt(s)) + ' سوداني'));
+    }
+
+    const tdRate = el('td', 'c-rate num muted');
+    const r = effectiveRate(e);
+    tdRate.textContent = e.type === 'exchange' && r != null ? fmt(r) : '—';
+
+    const tdComm = el('td', 'c-comm');
+    if (isCounted(e)) {
+      tdComm.appendChild(el('span', 'num neg-t strong', fmt(settings.commPer) + ' -'));
+    } else {
+      tdComm.appendChild(el('span', 'muted', '—'));
+    }
+
+    const tdDet = el('td', 'c-det');
+    tdDet.appendChild(el('div', '', e.details || '—'));
+    tdDet.appendChild(el('span', 'badge ' + (e.deducted ? 'warn' : 'ok') + ' chip', e.deducted ? 'مخصوم' : 'مكتمل'));
+
+    const tdAct = el('td', 'c-act');
+    const edit = el('button', 'btn-soft', 'تعديل');
+    edit.addEventListener('click', () => startEdit(e));
+    const del = el('button', 'btn-danger', 'حذف');
+    del.addEventListener('click', () => {
+      if (confirm('تأكيد الحذف؟')) {
+        db.ref('ledger/' + e.id).remove();
+      }
+    });
+    tdAct.append(edit, del);
+
+    tr.append(tdType, tdDate, tdAmt, tdRate, tdComm, tdDet, tdAct);
+    return tr;
   }
 
   function renderList() {
-    const q = $('search').value.trim().toLowerCase();
-    const ft = $('filterType').value;
-    const list = $('list');
-    list.textContent = '';
-    const items = entries
-      .filter(e => ft === 'all' || e.type === ft)
-      .filter(e => !q || (e.details || '').toLowerCase().includes(q) || String(e.amount).includes(q))
-      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
-
+    const body = $('list');
+    body.textContent = '';
+    const items = visibleItems();
+    $('ledgerCount').textContent = fmt(items.length);
     if (!items.length) {
-      const em = document.createElement('div'); em.className = 'empty'; em.textContent = 'لا توجد حركات';
-      list.appendChild(em); return;
+      const tr = el('tr');
+      const td = el('td', 'empty-row', 'لا توجد حركات');
+      td.colSpan = 7;
+      tr.appendChild(td);
+      body.appendChild(tr);
+      return;
     }
-    for (const e of items) {
-      const div = document.createElement('div'); div.className = 'entry';
-      const top = document.createElement('div'); top.className = 'top';
-      const tag = document.createElement('span');
-      tag.className = 'tag' + (e.type === 'sarTransfer' ? ' transfer' : e.type === 'bank' ? ' bank' : '');
-      tag.textContent = typeLabel(e.type);
-      const date = document.createElement('span'); date.className = 'meta'; date.textContent = e.date || '';
-      top.append(tag, date); div.appendChild(top);
+    for (const e of items) body.appendChild(rowFor(e));
+  }
 
-      const amounts = document.createElement('div');
-      if (e.type === 'exchange') {
-        const r = effectiveRate(e), s = sdgOf(e);
-        amounts.textContent = fmt(e.amount) + ' ريال × ' + (r == null ? '—' : fmt(r)) + ' = ' + (s == null ? '—' : fmt(s)) + ' سوداني';
-      } else if (e.type === 'sarTransfer') amounts.textContent = fmt(e.amount) + ' ريال';
-      else amounts.textContent = fmt(e.amount) + ' سوداني';
-      div.appendChild(amounts);
-
-      if (e.details) { const d = document.createElement('div'); d.className = 'meta'; d.textContent = e.details; div.appendChild(d); }
-      if (e.deducted) { const d = document.createElement('div'); d.className = 'ded'; d.textContent = 'مخصوم'; div.appendChild(d); }
-
-      const row = document.createElement('div'); row.className = 'actions';
-      const edit = document.createElement('button'); edit.className = 'edit'; edit.textContent = 'تعديل';
-      edit.addEventListener('click', () => startEdit(e));
-      const del = document.createElement('button'); del.className = 'danger'; del.textContent = 'حذف';
-      del.addEventListener('click', () => {
-        if (confirm('تأكيد الحذف؟')) db.ref('ledger/' + e.id).remove();
-      });
-      row.append(edit, del); div.appendChild(row);
-      list.appendChild(div);
-    }
+  function setFilter(mode) {
+    filterMode = mode;
+    document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+    renderList();
   }
 
   function renderNames() {
@@ -293,11 +677,108 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     });
   }
 
+  // ===== chart =====
+  function series() {
+    const ex = entries.filter(e => e.type === 'exchange');
+    const bank = entries.filter(e => e.type === 'bank');
+    const dates = [...new Set(entries.map(e => e.date || '').filter(Boolean))].sort();
+    let exS = 0, bankS = 0, cnt = 0;
+    const out = [];
+    for (const d of dates) {
+      ex.filter(e => e.date === d).forEach(e => {
+        exS += sdgOf(e) || 0;
+        if ((e.date || '') >= (settings.commFrom || '0000-00-00')) cnt++;
+      });
+      bank.filter(e => e.date === d).forEach(e => { bankS += Number(e.amount || 0); });
+      const comm = Number(settings.commFixed || 0) + cnt * Number(settings.commPer || 0);
+      out.push({ date: d, balance: bankS - exS - comm, bank: bankS });
+    }
+    return out;
+  }
+
+  function renderChart() {
+    const host = $('chart');
+    if (!host || !(ledgerLoaded && settingsLoaded)) return;
+    const pts = series();
+    host.textContent = '';
+    if (!pts.length) { host.appendChild(el('div', 'empty', 'لا توجد بيانات للرسم')); return; }
+
+    const W = Math.max(280, host.clientWidth), H = 240, pl = 12, pr = 12, pt = 14, pb = 30;
+    const vals = pts.map(p => chartMode === 'balance' ? p.balance : p.bank);
+    let min = Math.min(...vals), max = Math.max(...vals);
+    if (min === max) { min -= 1; max += 1; }
+    const n = pts.length;
+    const X = (i) => n === 1 ? W / 2 : pl + i * (W - pl - pr) / (n - 1);
+    const Y = (v) => pt + (max - v) * (H - pt - pb) / (max - min);
+    const NS = 'http://www.w3.org/2000/svg';
+    const mk = (tag, attrs) => {
+      const node = document.createElementNS(NS, tag);
+      for (const k in attrs) node.setAttribute(k, attrs[k]);
+      return node;
+    };
+
+    const svg = mk('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H });
+    const gid = 'cg' + Math.random().toString(36).slice(2, 8);
+    const defs = mk('defs', {});
+    const grad = mk('linearGradient', { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
+    grad.appendChild(mk('stop', { offset: '0%', 'stop-color': '#C4EE2B', 'stop-opacity': '0.35' }));
+    grad.appendChild(mk('stop', { offset: '100%', 'stop-color': '#C4EE2B', 'stop-opacity': '0' }));
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    for (let g = 0; g <= 4; g++) {
+      const y = pt + g * (H - pt - pb) / 4;
+      svg.appendChild(mk('line', { x1: pl, x2: W - pr, y1: y, y2: y, stroke: '#E3E9D9', 'stroke-width': 1 }));
+    }
+
+    let d = '';
+    pts.forEach((p, i) => { d += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(vals[i]).toFixed(1) + ' '; });
+    const area = d + 'L' + X(n - 1).toFixed(1) + ' ' + (H - pb) + ' L' + X(0).toFixed(1) + ' ' + (H - pb) + ' Z';
+    svg.appendChild(mk('path', { d: area, fill: 'url(#' + gid + ')' }));
+    svg.appendChild(mk('path', { d: d.trim(), fill: 'none', stroke: '#1B3314', 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+
+    const dot = mk('circle', { r: 6, fill: '#C4EE2B', stroke: '#1B3314', 'stroke-width': 2.5, visibility: 'hidden' });
+    svg.appendChild(dot);
+
+    const first = mk('text', { x: pl, y: H - 8, fill: '#6B7A60', 'font-size': 12 });
+    first.textContent = pts[0].date;
+    const last = mk('text', { x: W - pr, y: H - 8, fill: '#6B7A60', 'font-size': 12, 'text-anchor': 'end' });
+    last.textContent = pts[n - 1].date;
+    svg.appendChild(first); svg.appendChild(last);
+
+    const tip = el('div', 'tip');
+    host.append(svg, tip);
+
+    svg.addEventListener('pointermove', (ev) => {
+      const rect = svg.getBoundingClientRect();
+      const x = (ev.clientX - rect.left) * W / rect.width;
+      let idx = 0, best = Infinity;
+      for (let i = 0; i < n; i++) {
+        const dx = Math.abs(X(i) - x);
+        if (dx < best) { best = dx; idx = i; }
+      }
+      const cx = X(idx), cy = Y(vals[idx]);
+      dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('visibility', 'visible');
+      tip.textContent = '';
+      tip.appendChild(el('div', 'small', pts[idx].date));
+      tip.appendChild(el('div', 'num', fmt(vals[idx]) + ' جنيه'));
+      tip.style.display = 'block';
+      tip.style.left = (cx / W * 100) + '%';
+      tip.style.top = (cy / H * 240) + 'px';
+    });
+    svg.addEventListener('pointerleave', () => {
+      dot.setAttribute('visibility', 'hidden');
+      tip.style.display = 'none';
+    });
+  }
+
+  // ===== form =====
   function updateFormForType() {
     const t = $('type').value;
     $('amountLabel').textContent = t === 'bank' ? 'المبلغ بالسوداني' : 'المبلغ بالريال';
     $('rateWrap').style.display = t === 'exchange' ? '' : 'none';
     $('dedWrap').style.display = t === 'bank' ? 'none' : '';
+    document.querySelectorAll('[data-type]').forEach(b => b.classList.toggle('on', b.dataset.type === t));
     updatePreview();
   }
 
@@ -311,7 +792,7 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
   function resetForm() {
     editingId = null;
     $('formTitle').textContent = 'إضافة حركة';
-    $('saveBtn').textContent = 'إضافة';
+    $('saveBtn').textContent = 'إضافة الحركة';
     $('cancelBtn').classList.add('hidden');
     $('amount').value = ''; $('rate').value = ''; $('details').value = '';
     $('deducted').checked = false; $('date').value = today();
@@ -330,7 +811,7 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     $('details').value = e.details || '';
     $('deducted').checked = !!e.deducted;
     updateFormForType();
-    window.scrollTo({ top: $('formTitle').offsetTop - 10, behavior: 'smooth' });
+    $('formCard').scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
   }
 
   function saveEntry() {
@@ -362,22 +843,59 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
       commPer: Number($('commPer').value || 0),
       commFrom: $('commFrom').value || '2026-09-06'
     };
-    db.ref('settings').set(s);
+    db.ref('settings').set(s).then(() => {
+      const st = $('saveState');
+      st.classList.add('on');
+      clearTimeout(st._t);
+      st._t = setTimeout(() => st.classList.remove('on'), 1500);
+    });
   }
 
-  function bind() {
-    $('type').addEventListener('change', updateFormForType);
-    $('amount').addEventListener('input', updatePreview);
-    $('rate').addEventListener('input', updatePreview);
-    $('saveBtn').addEventListener('click', saveEntry);
-    $('cancelBtn').addEventListener('click', resetForm);
-    $('search').addEventListener('input', renderList);
-    $('filterType').addEventListener('change', renderList);
-    ['defaultRate', 'commFixed', 'commPer', 'commFrom'].forEach(id => $(id).addEventListener('input', writeSettings));
-    $('logoutBtn').addEventListener('click', () => auth.signOut());
-    $('importBtn').addEventListener('click', importSeed);
-    $('loginBtn').addEventListener('click', login);
-    $('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  // ===== navigation (sidebar) =====
+  function closeNav() { document.body.classList.remove('nav-open'); }
+  function go(nav) {
+    document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === nav));
+    closeNav();
+    if (nav === 'top') { window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' }); return; }
+    if (nav === 'ledger') setFilter('all');
+    if (nav === 'transfers') setFilter('sarTransfer');
+    const target = { ledger: 'ledgerCard', transfers: 'ledgerCard', settings: 'settingsCard', reports: 'chartCard' }[nav];
+    if (target) $(target).scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  // ===== data =====
+  function onLoaded() {
+    if (ledgerLoaded && settingsLoaded) document.body.classList.remove('loading');
+  }
+  function renderAll() {
+    renderKpis();
+    renderList();
+    renderChart();
+    updatePreview();
+  }
+
+  function startData() {
+    document.body.classList.add('loading');
+    ledgerLoaded = false; settingsLoaded = false;
+    db.ref('ledger').on('value', snap => {
+      const v = snap.val() || {};
+      entries = Object.entries(v).map(([id, x]) => ({ id, ...x }));
+      $('importBtn').classList.toggle('hidden', entries.length > 0);
+      ledgerLoaded = true;
+      renderNames();
+      renderAll();
+      onLoaded();
+    });
+    db.ref('settings').on('value', snap => {
+      settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06', ...(snap.val() || {}) };
+      if (document.activeElement !== $('defaultRate')) $('defaultRate').value = settings.defaultRate ?? '';
+      if (document.activeElement !== $('commFixed')) $('commFixed').value = settings.commFixed ?? 4260;
+      if (document.activeElement !== $('commPer')) $('commPer').value = settings.commPer ?? 110;
+      $('commFrom').value = settings.commFrom || '2026-09-06';
+      settingsLoaded = true;
+      renderAll();
+      onLoaded();
+    });
   }
 
   function login() {
@@ -397,21 +915,41 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     ref.update(updates).then(() => alert('تم الاستيراد')).catch(err => alert('فشل: ' + err.message));
   }
 
-  function startData() {
-    db.ref('ledger').on('value', snap => {
-      const v = snap.val() || {};
-      entries = Object.entries(v).map(([id, x]) => ({ id, ...x }));
-      $('importBtn').classList.toggle('hidden', entries.length > 0);
-      renderKpis(); renderList(); renderNames();
+  function bind() {
+    $('type').addEventListener('change', updateFormForType);
+    $('amount').addEventListener('input', updatePreview);
+    $('rate').addEventListener('input', updatePreview);
+    $('saveBtn').addEventListener('click', saveEntry);
+    $('cancelBtn').addEventListener('click', resetForm);
+    $('search').addEventListener('input', renderList);
+    ['defaultRate', 'commFixed', 'commPer', 'commFrom'].forEach(id => $(id).addEventListener('input', writeSettings));
+    $('importBtn').addEventListener('click', importSeed);
+    $('loginBtn').addEventListener('click', login);
+    $('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+    document.querySelectorAll('[data-type]').forEach(b => b.addEventListener('click', () => {
+      $('type').value = b.dataset.type;
+      updateFormForType();
+    }));
+    document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setFilter(b.dataset.mode)));
+    document.querySelectorAll('[data-chart]').forEach(b => b.addEventListener('click', () => {
+      chartMode = b.dataset.chart;
+      document.querySelectorAll('[data-chart]').forEach(x => x.classList.toggle('on', x === b));
+      renderChart();
+    }));
+    document.querySelectorAll('[data-nav]').forEach(a => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      go(a.dataset.nav);
+    }));
+    document.querySelectorAll('[data-logout]').forEach(b => b.addEventListener('click', () => auth.signOut()));
+    $('menuBtn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
+    $('scrim').addEventListener('click', closeNav);
+    $('newBtn').addEventListener('click', () => {
+      resetForm();
+      $('formCard').scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      $('amount').focus();
     });
-    db.ref('settings').on('value', snap => {
-      settings = { defaultRate: '', commFixed: 4260, commPer: 110, commFrom: '2026-09-06', ...(snap.val() || {}) };
-      if (document.activeElement !== $('defaultRate')) $('defaultRate').value = settings.defaultRate ?? '';
-      if (document.activeElement !== $('commFixed')) $('commFixed').value = settings.commFixed ?? 4260;
-      if (document.activeElement !== $('commPer')) $('commPer').value = settings.commPer ?? 110;
-      $('commFrom').value = settings.commFrom || '2026-09-06';
-      renderKpis(); updatePreview();
-    });
+    if (window.ResizeObserver) new ResizeObserver(() => renderChart()).observe($('chart'));
   }
 
   auth.onAuthStateChanged(user => {
@@ -424,9 +962,11 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
       $('loginCard').classList.remove('hidden');
       $('app').classList.add('hidden');
       $('loginStatus').textContent = '';
+      closeNav();
     }
   });
 
+  $('todayAr').textContent = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
   bind();
   updateFormForType();
 })();
