@@ -235,13 +235,23 @@
   @keyframes pulseSoft { 0% { transform: scale(1); } 40% { transform: scale(1.012); } 100% { transform: scale(1); } }
   .enter { animation: rise .55s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--i, 0) * 90ms); }
   .pulse { animation: pulseSoft .5s ease-out; }
-  .sbal, .skpi, .bal, .kpi { transition: transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s ease; }
+  .sbal, .skpi, .bal, .kpi { transition: transform .5s cubic-bezier(.34,1.45,.64,1), box-shadow .35s ease; }
   .li { transition: transform .3s cubic-bezier(.2,.7,.2,1), color .3s ease; }
   .search-box:focus-within .li-field { color: var(--lime); }
   @media (hover: hover) and (pointer: fine) {
     .sbal:hover, .skpi:hover, .bal:hover, .kpi:hover { transform: translateY(-3px); box-shadow: 0 24px 40px -24px rgba(0,0,0,.65), 0 0 0 1px rgba(196,238,43,.12); }
     .sbal:hover .ico, .skpi:hover .ico, .bal:hover .li-lbl, .kpi:hover .li-lbl { transform: translateY(-2px) scale(1.08); }
     .btn-primary:hover .li-btn, .btn-soft:hover .li-btn, .btn-danger:hover .li-btn, .btn-ghost:hover .li-btn { transform: scale(1.15); }
+  }
+  /* ---------- premium motion ---------- */
+  .sbal:active, .skpi:active, .bal:active, .kpi:active { transform: scale(.985); transition-duration: .12s; }
+  .btn-primary:active, .btn-soft:active, .btn-danger:active, .btn-ghost:active { transform: scale(.97); }
+  @keyframes freshGlow { 0% { box-shadow: inset 3px 0 0 var(--lime), 0 0 0 0 rgba(196,238,43,.35); } 100% { box-shadow: inset 3px 0 0 rgba(196,238,43,0), 0 0 0 14px rgba(196,238,43,0); } }
+  .item.fresh { animation: rise .5s cubic-bezier(.2,.7,.2,1) backwards, freshGlow 1.8s ease-out; }
+  .item.updated { animation: freshGlow 1.8s ease-out; }
+  @media (hover: hover) and (pointer: fine) {
+    #settingsCard h2:hover .li-h { transform: rotate(60deg); }
+    .kind:hover .kind-ico { transform: translateX(2px); }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -553,6 +563,21 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
       .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
   }
 
+  // ===== operation highlights: new or updated operations (display only) =====
+  let seenIds = null;
+  const lastSig = new Map();
+  function markItem(card, e) {
+    const sig = JSON.stringify(e);
+    if (seenIds) {
+      if (!seenIds.has(e.id)) card.classList.add('fresh');
+      else if (lastSig.get(e.id) !== sig) card.classList.add('updated');
+    }
+  }
+  function rememberItems() {
+    seenIds = new Set(entries.map(x => x.id));
+    lastSig.clear();
+    entries.forEach(x => lastSig.set(x.id, JSON.stringify(x)));
+  }
   function renderList() {
     const list = $('list');
     list.textContent = '';
@@ -589,8 +614,10 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
       actions.append(edit, del);
       card.appendChild(actions);
 
+      markItem(card, e);
       list.appendChild(card);
     }
+    rememberItems();
   }
 
   function setFilter(mode) {
