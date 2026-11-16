@@ -217,8 +217,22 @@
   @media (max-width: 899px) and (min-width: 0px) {
     .item { align-items: stretch; }
   }
+  /* ---------- motion ---------- */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes pulseSoft { 0% { transform: scale(1); } 40% { transform: scale(1.012); } 100% { transform: scale(1); } }
+  .enter { animation: rise .55s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--i, 0) * 90ms); }
+  .pulse { animation: pulseSoft .5s ease-out; }
+  .sbal, .skpi, .bal, .kpi { transition: transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s ease; }
+  .li { transition: transform .3s cubic-bezier(.2,.7,.2,1), color .3s ease; }
+  .search-box:focus-within .li-field { color: var(--lime); }
+  @media (hover: hover) and (pointer: fine) {
+    .sbal:hover, .skpi:hover, .bal:hover, .kpi:hover { transform: translateY(-3px); box-shadow: 0 24px 40px -24px rgba(0,0,0,.65), 0 0 0 1px rgba(196,238,43,.12); }
+    .sbal:hover .ico, .skpi:hover .ico, .bal:hover .li-lbl, .kpi:hover .li-lbl { transform: translateY(-2px) scale(1.08); }
+    .btn-primary:hover .li-btn, .btn-soft:hover .li-btn, .btn-danger:hover .li-btn, .btn-ghost:hover .li-btn { transform: scale(1.15); }
+  }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
+    .sbal, .skpi, .bal, .kpi { transform: none !important; }
   }
 
   /* ---------- icons ---------- */
@@ -414,6 +428,16 @@ const db = firebase.database();
     clearTimeout(card._ft);
     card._ft = setTimeout(() => card.classList.remove('flash-good', 'flash-bad'), 1200);
   }
+  // ===== motion: staggered entrance (display only) =====
+  document.querySelectorAll('.bal, .kpi, .latest').forEach((n, i) => { n.classList.add('enter'); n.style.setProperty('--i', i); });
+  function pulseCard(node) {
+    const card = node.closest('.sbal, .skpi, .bal, .kpi');
+    if (!card || reduceMotion.matches) return;
+    card.classList.remove('pulse');
+    void card.offsetWidth;
+    card.classList.add('pulse');
+    card.addEventListener('animationend', () => card.classList.remove('pulse'), { once: true });
+  }
   const NUM_IDS = ['kRemSdg', 'kRemSar', 'kTotalSar', 'kSarTr', 'kTotalSdg', 'kBank'];
   function setNum(id, value, index) {
     const node = $(id);
@@ -428,6 +452,7 @@ const db = firebase.database();
     const from = node._cur;
     node._cur = to;
     flash(node, to > from);
+    pulseCard(node);
     animate(node, from, to, 900, 0);
   }
 

@@ -230,8 +230,22 @@
     input, select { font-size: 16px; }
     .actions button { flex: 1; }
   }
+  /* ---------- motion ---------- */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes pulseSoft { 0% { transform: scale(1); } 40% { transform: scale(1.012); } 100% { transform: scale(1); } }
+  .enter { animation: rise .55s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--i, 0) * 90ms); }
+  .pulse { animation: pulseSoft .5s ease-out; }
+  .sbal, .skpi, .bal, .kpi { transition: transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s ease; }
+  .li { transition: transform .3s cubic-bezier(.2,.7,.2,1), color .3s ease; }
+  .search-box:focus-within .li-field { color: var(--lime); }
+  @media (hover: hover) and (pointer: fine) {
+    .sbal:hover, .skpi:hover, .bal:hover, .kpi:hover { transform: translateY(-3px); box-shadow: 0 24px 40px -24px rgba(0,0,0,.65), 0 0 0 1px rgba(196,238,43,.12); }
+    .sbal:hover .ico, .skpi:hover .ico, .bal:hover .li-lbl, .kpi:hover .li-lbl { transform: translateY(-2px) scale(1.08); }
+    .btn-primary:hover .li-btn, .btn-soft:hover .li-btn, .btn-danger:hover .li-btn, .btn-ghost:hover .li-btn { transform: scale(1.15); }
+  }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
+    .sbal, .skpi, .bal, .kpi { transform: none !important; }
   }
 
   /* ---------- icons ---------- */
@@ -684,16 +698,53 @@ const SEED = [{"type": "exchange", "date": "2026-09-01", "amount": 650, "rate": 
     });
   }
 
+  // ===== count-up (display only; final value is always the exact total) =====
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function animate(node, from, to, dur, delay) {
+    cancelAnimationFrame(node._raf);
+    if (reduceMotion.matches || dur <= 0) { node.textContent = fmt(to); return; }
+    const start = performance.now() + (delay || 0);
+    const step = (now) => {
+      const t = Math.min(1, Math.max(0, (now - start) / dur));
+      const k = 1 - Math.pow(1 - t, 3);
+      node.textContent = t >= 1 ? fmt(to) : fmt(from + (to - from) * k);
+      if (t < 1) node._raf = requestAnimationFrame(step);
+    };
+    node.textContent = fmt(from);
+    node._raf = requestAnimationFrame(step);
+  }
+  function setNum(id, value, index) {
+    const node = document.getElementById(id);
+    if (!node) return;
+    const to = Number(value) || 0;
+    if (node._cur === undefined) { node._cur = to; animate(node, 0, to, 1000, (index || 0) * 80); return; }
+    if (node._cur === to) return;
+    const from = node._cur;
+    node._cur = to;
+    pulseCard(node);
+    animate(node, from, to, 900, 0);
+  }
+
+  // ===== motion: staggered entrance (display only) =====
+  document.querySelectorAll('.sbal, .skpi, #settingsCard, #formCard, #ledgerCard').forEach((n, i) => { n.classList.add('enter'); n.style.setProperty('--i', i); });
+  function pulseCard(node) {
+    const card = node.closest('.sbal, .skpi, .bal, .kpi');
+    if (!card || reduceMotion.matches) return;
+    card.classList.remove('pulse');
+    void card.offsetWidth;
+    card.classList.add('pulse');
+    card.addEventListener('animationend', () => card.classList.remove('pulse'), { once: true });
+  }
+
   // ===== data =====
   function renderKpis() {
     const t = computeTotals();
-    const put = (id, v) => { const n = $(id); if (n) n.textContent = fmt(v); };
-    put('kRemSdg', t.remSdg);
-    put('kRemSar', t.remSar);
-    put('kTotalSar', t.totalSar);
-    put('kSarTr', t.sarTrTotal);
-    put('kTotalSdg', t.totalSdg);
-    put('kBank', t.bankTotal);
+    setNum('kRemSdg', t.remSdg, 0);
+    setNum('kRemSar', t.remSar, 1);
+    setNum('kTotalSar', t.totalSar, 2);
+    setNum('kSarTr', t.sarTrTotal, 3);
+    setNum('kTotalSdg', t.totalSdg, 4);
+    setNum('kBank', t.bankTotal, 5);
   }
 
   function updateClock() {
